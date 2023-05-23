@@ -13,6 +13,12 @@ import {
 import { CourseInfoScreen, HomeDesignCourse } from './design_course';
 import { IntroductionAnimationScreen } from './introduction_animation';
 import HotelHomeScreen from './hotel_booking/HotelHomeScreen';
+import {
+  DashboardScreen,
+  AppointmentScreen,
+  CallScreen,
+  SettingsScreen,
+} from './screens';
 
 const Drawer = createDrawerNavigator();
 /**
@@ -49,6 +55,7 @@ const DrawerNavigator: React.FC = () => {
       <Drawer.Screen name="help" component={HelpScene} />
       <Drawer.Screen name="feedback" component={FeedbackScene} />
       <Drawer.Screen name="invite_friend" component={InviteFriendScene} />
+      <Drawer.Screen name="DashboardScreen" component={DashboardScreen} />
     </Drawer.Navigator>
   );
 };
@@ -76,6 +83,15 @@ export default () => {
           name="onBoarding"
           component={IntroductionAnimationScreen}
         />
+
+        {/* Dashboard Screen */}
+        <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
+        {/* Appointment Screen */}
+        <Stack.Screen name="AppointmentScreen" component={AppointmentScreen} />
+        {/* Appointment Screen */}
+        <Stack.Screen name="CallScreen" component={CallScreen} />
+        {/* Appointment Screen */}
+        <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
       </Stack.Navigator>
     </>
   );
