@@ -36,6 +36,7 @@ interface DrawerItemProps extends DrawerScene {
 
 const DRAWER_SCENES: DrawerScene[] = [
   { label: 'Home', icon: 'home', routeKey: 'home' },
+  { label: 'ITP App', icon: 'home', routeKey: 'DashboardScreen' },
   {
     label: 'Help',
     icon: AppImages.support_icon,
@@ -44,8 +45,8 @@ const DRAWER_SCENES: DrawerScene[] = [
   },
   { label: 'Feedback', icon: 'help', routeKey: 'feedback' },
   { label: 'Invite Friend', icon: 'group', routeKey: 'invite_friend' },
-  { label: 'Rate the app', icon: 'share' },
-  { label: 'About Us', icon: 'info' },
+  // { label: 'Rate the app', icon: 'share' },
+  // { label: 'About Us', icon: 'info' },
 ];
 
 const getActiveRouteState = (
