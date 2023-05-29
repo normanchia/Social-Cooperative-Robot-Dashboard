@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
   Text,
   SafeAreaView,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
@@ -12,6 +13,9 @@ import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import { showToast } from '../util/action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import MapView, { Marker } from 'react-native-maps';
+import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
+import { PermissionsAndroid } from 'react-native';
 
 //Temp Data
 const todaysAppt = {
@@ -42,9 +46,80 @@ const upcomingAppt = [
   },
 ];
 
+interface CurrentLocation {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+}
+
 const DashboardScreen: React.FC = () => {
+  const [mapContainer, setMapContainer] = useState(false);
+  const [currentLocation, setCurrentLocation] =
+    useState<CurrentLocation | null>(null);
+
+  //Get the user's current location
+  const getCurrentLocation = async () => {
+    try {
+      // Location permission
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Location Permission',
+          message: 'This app needs access to your location.',
+          buttonPositive: 'OK',
+          buttonNegative: 'Cancel',
+        },
+      );
+
+      //If permission granted, get the current location
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        Geolocation.getCurrentPosition(
+          handleLocationUpdate,
+          error => {
+            console.log(error);
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+        );
+      } else {
+        console.log('Location permission denied');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Update the current location
+  const handleLocationUpdate = (position: GeoPosition) => {
+    const { latitude, longitude } = position.coords;
+    setCurrentLocation({
+      latitude,
+      longitude,
+      latitudeDelta: 0.04,
+      longitudeDelta: 0.04,
+    });
+  };
+
+  //Get the initial location
+  useEffect(() => {
+    getCurrentLocation();
+
+    //Watch the location for changes
+    const watchId = Geolocation.watchPosition(
+      handleLocationUpdate,
+      error => {
+        console.log(error);
+      },
+      { enableHighAccuracy: true, distanceFilter: 10 },
+    );
+
+    return () => {
+      Geolocation.clearWatch(watchId);
+    };
+  }, []);
+
   const callRobotHandler = () => {
-    showToast('Calling Robot');
+    setMapContainer(true);
   };
 
   return (
@@ -53,10 +128,23 @@ const DashboardScreen: React.FC = () => {
         {/* Header */}
         <Header headerText={'Hi Joe !'} home={true} />
         {/* Main Content */}
-        <View style={bodyContainer.container}>
+        {/* Map Container */}
+        {mapContainer && (
+          <View style={styles.mapContainer}>
+            {currentLocation && (
+              <MapView
+                style={{ alignSelf: 'stretch', height: '100%' }}
+                region={currentLocation}
+              >
+                <Marker coordinate={currentLocation} title="Marker" />
+              </MapView>
+            )}
+          </View>
+        )}
+        <ScrollView style={bodyContainer.container}>
           {/* Today's Appointment Card */}
           <View style={styles.cardContainer}>
-            <Text style={styles.cardHeading}>Today's Appoinment</Text>
+            <Text style={styles.cardHeading}>Today's Appointment</Text>
             <ApptCardRow appt={[todaysAppt]} />
 
             <TouchableOpacity style={styles.cardBtn} onPress={callRobotHandler}>
@@ -65,10 +153,10 @@ const DashboardScreen: React.FC = () => {
           </View>
           {/* Upcoming  Appointment Card */}
           <View style={styles.cardContainer}>
-            <Text style={styles.cardHeading}>Upcoming Appoinment</Text>
+            <Text style={styles.cardHeading}>Upcoming Appointment</Text>
             <ApptCardRow appt={upcomingAppt} />
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
       {/* Bottom Nav */}
       <BottomNav activeRoute={'DashboardScreen'} />
@@ -153,6 +241,10 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  mapContainer: {
+    height: 300,
+    backgroundColor: 'red',
   },
 });
 
