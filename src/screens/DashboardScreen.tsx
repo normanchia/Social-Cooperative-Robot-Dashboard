@@ -11,13 +11,12 @@ import {
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
-import { showToast } from '../util/action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { PermissionsAndroid } from 'react-native';
 
-//Temp Data
+//Get: User's today's appointment
 const todaysAppt = {
   id: 1,
   name: 'Medical @TTSH1',
@@ -25,6 +24,7 @@ const todaysAppt = {
   time: '08:00 am',
 };
 
+//Get: User's upcoming appointment
 const upcomingAppt = [
   {
     id: 1,
@@ -145,6 +145,7 @@ const DashboardScreen: React.FC = () => {
           {/* Today's Appointment Card */}
           <View style={styles.cardContainer}>
             <Text style={styles.cardHeading}>Today's Appointment</Text>
+            <View style={styles.border} />
             <ApptCardRow appt={[todaysAppt]} />
 
             <TouchableOpacity style={styles.cardBtn} onPress={callRobotHandler}>
@@ -154,6 +155,7 @@ const DashboardScreen: React.FC = () => {
           {/* Upcoming  Appointment Card */}
           <View style={styles.cardContainer}>
             <Text style={styles.cardHeading}>Upcoming Appointment</Text>
+            <View style={styles.border} />
             <ApptCardRow appt={upcomingAppt} />
           </View>
         </ScrollView>
@@ -205,6 +207,11 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
   },
+  border: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray,
+    paddingBottom: 10,
+  },
   cardHeading: {
     fontSize: 25,
     fontWeight: 'bold',
@@ -217,6 +224,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 10,
     paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray,
   },
   cardInfo: {
     flexDirection: 'column',
