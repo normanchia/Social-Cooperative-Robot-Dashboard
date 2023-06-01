@@ -15,6 +15,7 @@ import { IntroductionAnimationScreen } from './introduction_animation';
 import HotelHomeScreen from './hotel_booking/HotelHomeScreen';
 import {
   DashboardScreen,
+  AddAppointmentScreen,
   AppointmentScreen,
   CallScreen,
   SettingsScreen,
@@ -86,11 +87,16 @@ export default () => {
 
         {/* Dashboard Screen */}
         <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
+        {/* Add Appointment Screen */}
+        <Stack.Screen
+          name="AddAppointmentScreen"
+          component={AddAppointmentScreen}
+        />
         {/* Appointment Screen */}
         <Stack.Screen name="AppointmentScreen" component={AppointmentScreen} />
-        {/* Appointment Screen */}
+        {/* Call Screen */}
         <Stack.Screen name="CallScreen" component={CallScreen} />
-        {/* Appointment Screen */}
+        {/* Settings Screen */}
         <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
       </Stack.Navigator>
     </>
