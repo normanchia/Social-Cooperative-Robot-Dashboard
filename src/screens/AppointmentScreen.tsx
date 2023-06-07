@@ -1,3 +1,5 @@
+// TODO Fix green border with the appointments
+
 import React, { useState } from 'react';
 import {
   StyleSheet,
