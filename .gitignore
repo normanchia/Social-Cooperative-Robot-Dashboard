@@ -1,3 +1,7 @@
+#venv
+ITP_Backend/venv/
+ITP_Backend/__pycache__/
+
 # OSX
 #
 .DS_Store
