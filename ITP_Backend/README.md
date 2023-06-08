@@ -1,5 +1,7 @@
 # Setup
 
+> :warning: **Warning: This project is not compatible with Python 3.11 and above!**
+
 ## 1. Create a Virtual Environment
 To create a virtual environment, navigate to the project directory in your terminal and run the following commands:
 
