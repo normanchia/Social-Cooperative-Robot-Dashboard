@@ -14,7 +14,7 @@ import BottomNav from '../components/BottomNav';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
-import { PermissionsAndroid } from 'react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
 
 //Get: User's today's appointment
 const todaysAppt = {
@@ -58,22 +58,29 @@ const DashboardScreen: React.FC = () => {
   const [currentLocation, setCurrentLocation] =
     useState<CurrentLocation | null>(null);
 
-  //Get the user's current location
+    //Get the user's current location
   const getCurrentLocation = async () => {
     try {
-      // Location permission
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Permission',
-          message: 'This app needs access to your location.',
-          buttonPositive: 'OK',
-          buttonNegative: 'Cancel',
-        },
-      );
+      let granted = false;
+      if (Platform.OS === 'android') {
+        const permission = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message: 'This app needs access to your location.',
+            buttonPositive: 'OK',
+            buttonNegative: 'Cancel',
+          },
+        );
+        granted = (permission === PermissionsAndroid.RESULTS.GRANTED);
+      } else {
+        // iOS Permission request
+        Geolocation.requestAuthorization('whenInUse');
+        granted = true;
+      }
 
       //If permission granted, get the current location
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      if (granted) {
         Geolocation.getCurrentPosition(
           handleLocationUpdate,
           error => {
