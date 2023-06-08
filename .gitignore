@@ -66,9 +66,4 @@ yarn-error.log
 # Temporary files created by Metro to check the health of the file watcher
 .metro-health-check*
 package-lock.json
-.gitignore
 ios/react_native_UI_Templates.xcodeproj/project.pbxproj
-package-lock.json
-yarn.lock
-ios/react_native_UI_Templates.xcodeproj/project.pbxproj
-ios/Podfile.lock
