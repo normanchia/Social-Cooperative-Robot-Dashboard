@@ -80,3 +80,5 @@ const styles = StyleSheet.create({
 });
 
 export default LocationCardRow;
+
+export default LocationCardRow;
