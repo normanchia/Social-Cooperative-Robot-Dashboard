@@ -9,7 +9,7 @@ interface BottomNavProps {
   activeRoute?: string;
 }
 
-type RootStackParamList = {
+type ScreenList = {
   DashboardScreen: undefined;
   AppointmentScreen: undefined;
   CallScreen: undefined;
@@ -19,7 +19,7 @@ type RootStackParamList = {
 const BottomNav: React.FC<BottomNavProps> = ({
   activeRoute = 'DashboardScreen',
 }) => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NavigationProp<ScreenList>>();
 
   const navigationHandler = (route: number) => {
     switch (route) {

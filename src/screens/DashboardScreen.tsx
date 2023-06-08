@@ -10,10 +10,9 @@ import {
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
-import { showToast } from '../util/action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-//Temp Data
+//Get: User's today's appointment
 const todaysAppt = {
   id: 1,
   name: 'Medical @TTSH1',
@@ -21,6 +20,7 @@ const todaysAppt = {
   time: '08:00 am',
 };
 
+//Get: User's upcoming appointment
 const upcomingAppt = [
   {
     id: 1,
@@ -43,10 +43,6 @@ const upcomingAppt = [
 ];
 
 const DashboardScreen: React.FC = () => {
-  const callRobotHandler = () => {
-    showToast('Calling Robot');
-  };
-
   return (
     <>
       <SafeAreaView style={mainContainer.container}>
@@ -57,15 +53,17 @@ const DashboardScreen: React.FC = () => {
           {/* Today's Appointment Card */}
           <View style={styles.cardContainer}>
             <Text style={styles.cardHeading}>Today's Appoinment</Text>
+            <View style={styles.border} />
             <ApptCardRow appt={[todaysAppt]} />
 
-            <TouchableOpacity style={styles.cardBtn} onPress={callRobotHandler}>
+            <TouchableOpacity style={styles.cardBtn}>
               <Text style={styles.cardBtnText}>Call Robot</Text>
             </TouchableOpacity>
           </View>
           {/* Upcoming  Appointment Card */}
           <View style={styles.cardContainer}>
             <Text style={styles.cardHeading}>Upcoming Appoinment</Text>
+            <View style={styles.border} />
             <ApptCardRow appt={upcomingAppt} />
           </View>
         </View>
@@ -129,6 +127,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 10,
     paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray,
   },
   cardInfo: {
     flexDirection: 'column',
@@ -153,6 +153,11 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  border: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray,
+    paddingBottom: 10,
   },
 });
 
