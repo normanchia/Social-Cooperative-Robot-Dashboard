@@ -52,13 +52,21 @@ This will update the requirements.txt file with any new dependencies you've inst
 To run the server, execute the following command:
 
 ```bash
-export FLASK_APP=location_endpoint.py
+export FLASK_APP=app.py
 flask run
 ```
 On Windows, use set instead of export:
 
 ```bash
-set FLASK_APP=location_endpoint.py
+set FLASK_APP=app.py
 flask run
+```
+
+Alternatelively you can run the file: 
+```bash
+python3 app.py
+
+#Windows
+py app.py
 ```
 This will start your Flask server!
