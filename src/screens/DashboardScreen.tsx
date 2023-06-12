@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { useTheme } from 'react-native-paper';
+
 
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
@@ -54,6 +56,8 @@ interface CurrentLocation {
 }
 
 const DashboardScreen: React.FC = () => {
+  const theme = useTheme(); // use the theme hook
+
   const [mapContainer, setMapContainer] = useState(false);
   const [currentLocation, setCurrentLocation] =
     useState<CurrentLocation | null>(null);
@@ -155,7 +159,10 @@ const DashboardScreen: React.FC = () => {
             <View style={styles.border} />
             <ApptCardRow appt={[todaysAppt]} />
 
-            <TouchableOpacity style={styles.cardBtn} onPress={callRobotHandler}>
+            <TouchableOpacity 
+              style={[styles.cardBtn, { backgroundColor: theme.colors.primary }]} 
+            onPress={callRobotHandler}
+            >   
               <Text style={styles.cardBtnText}>Call Robot</Text>
             </TouchableOpacity>
           </View>

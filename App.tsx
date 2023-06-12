@@ -1,18 +1,19 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
 import React from 'react';
+import { Appearance, ColorSchemeName } from 'react-native';
+import { Provider as PaperProvider } from 'react-native-paper';
 import AppControlFlow from './src/AppControlFlow';
 
+import { CustomLightTheme, CustomDarkTheme } from './src/themes/CustomThemes';
+
 const App = () => {
-  return <AppControlFlow />;
+  const colorScheme: ColorSchemeName = Appearance.getColorScheme();
+  const theme = colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme;
+
+  return (
+    <PaperProvider theme={theme}>
+      <AppControlFlow />
+    </PaperProvider>
+  );
 };
 
 export default App;
