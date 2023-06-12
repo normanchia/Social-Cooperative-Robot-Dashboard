@@ -19,6 +19,9 @@ import {
   AppointmentScreen,
   CallScreen,
   SettingsScreen,
+  LoginScreen,
+  HelpScreen,
+  DriverDashboardScreen,
 } from './screens';
 
 const Drawer = createDrawerNavigator();
@@ -81,6 +84,15 @@ export default () => {
           name="onBoarding"
           component={IntroductionAnimationScreen}
         /> */}
+        {/* Login Screen */}
+        <Stack.Screen name="LoginScreen" component={LoginScreen} />
+        {/* Driver Dashboard Screen */}
+        <Stack.Screen
+          name="DriverDashboardScreen"
+          component={DriverDashboardScreen}
+        />
+        {/* Help Screen */}
+        <Stack.Screen name="HelpScreen" component={HelpScreen} />
         {/* Dashboard Screen */}
         <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
         {/* Add Appointment Screen */}

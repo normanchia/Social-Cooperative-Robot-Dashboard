@@ -5,32 +5,26 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { colors } from '../styles/styles';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-interface BottomNavProps {
-  activeRoute?: string;
-}
-
 type ScreenList = {
-  DashboardScreen: undefined;
+  HelpScreen: undefined;
   AppointmentScreen: undefined;
   CallScreen: undefined;
   SettingsScreen: undefined;
 };
 
-const BottomNav: React.FC<BottomNavProps> = ({
-  activeRoute = 'DashboardScreen',
-}) => {
+const BottomNav: React.FC = () => {
   const navigation = useNavigation<NavigationProp<ScreenList>>();
 
   const navigationHandler = (route: number) => {
     switch (route) {
       case 1:
-        navigation.navigate('DashboardScreen');
-        break;
-      case 2:
         navigation.navigate('AppointmentScreen');
         break;
-      case 3:
+      case 2:
         navigation.navigate('CallScreen');
+        break;
+      case 3:
+        navigation.navigate('HelpScreen');
         break;
       case 4:
         navigation.navigate('SettingsScreen');
@@ -40,129 +34,74 @@ const BottomNav: React.FC<BottomNavProps> = ({
     }
   };
   return (
-    <View style={styles.container}>
-      <View style={styles.navRow}>
-        {/* Home */}
+    <>
+      <View style={styles.container}>
         <TouchableOpacity
+          style={{ ...styles.button, backgroundColor: '#58AF90' }}
           onPress={() => navigationHandler(1)}
-          style={styles.navIconContainer}
         >
-          <Icon
-            size={35}
-            name="home"
-            style={styles.navIcon}
-            color={
-              activeRoute === 'DashboardScreen' ? colors.primary : colors.black
-            }
-          />
-          <Text
-            style={
-              activeRoute === 'HomeScreen'
-                ? styles.activeNavIconText
-                : styles.navIconText
-            }
-          >
-            Home
-          </Text>
+          <View style={styles.buttonContent}>
+            <Icon size={80} name="calendar-today" color="white" />
+            <Text style={styles.buttonText}>Appointment</Text>
+          </View>
         </TouchableOpacity>
-        {/* Calendar */}
         <TouchableOpacity
+          style={styles.button}
           onPress={() => navigationHandler(2)}
-          style={styles.navIconContainer}
         >
-          <Icon
-            size={35}
-            name="calendar-today"
-            style={styles.navIcon}
-            color={
-              activeRoute === 'AppointmentScreen'
-                ? colors.primary
-                : colors.black
-            }
-          />
-          <Text
-            style={
-              activeRoute === 'AppointmentScreen'
-                ? styles.activeNavIconText
-                : styles.navIconText
-            }
-          >
-            Appt
-          </Text>
-        </TouchableOpacity>
-        {/* Call */}
-        <TouchableOpacity
-          onPress={() => navigationHandler(3)}
-          style={styles.navIconContainer}
-        >
-          <Icon
-            size={35}
-            name="phone"
-            style={styles.navIcon}
-            color={activeRoute === 'CallScreen' ? colors.primary : colors.black}
-          />
-          <Text
-            style={
-              activeRoute === 'CallScreen'
-                ? styles.activeNavIconText
-                : styles.navIconText
-            }
-          >
-            Call
-          </Text>
-        </TouchableOpacity>
-        {/* Settings */}
-        <TouchableOpacity
-          onPress={() => navigationHandler(4)}
-          style={styles.navIconContainer}
-        >
-          <Icon
-            size={35}
-            name="settings"
-            style={styles.navIcon}
-            color={
-              activeRoute === 'SettingsScreen' ? colors.primary : colors.black
-            }
-          />
-          <Text
-            style={
-              activeRoute === 'SettingsScreen'
-                ? styles.activeNavIconText
-                : styles.navIconText
-            }
-          >
-            settings
-          </Text>
+          <View style={styles.buttonContent}>
+            <Icon size={80} name="phone" color="white" />
+            <Text style={styles.buttonText}>Request Robot</Text>
+          </View>
         </TouchableOpacity>
       </View>
-    </View>
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={{ ...styles.button, backgroundColor: '#C52E2E' }}
+          onPress={() => navigationHandler(3)}
+        >
+          <View style={styles.buttonContent}>
+            <Icon size={80} name="help" color="white" />
+            <Text style={styles.buttonText}>Help</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ ...styles.button, backgroundColor: '#E99E2F' }}
+          onPress={() => navigationHandler(4)}
+        >
+          <View style={styles.buttonContent}>
+            <Icon size={80} name="settings" color="white" />
+            <Text style={styles.buttonText}>Settings</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </>
   );
 };
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
-    paddingVertical: 10,
-    borderTopWidth: 0.8,
-    borderTopColor: '#ccc',
-    backgroundColor: colors.white,
-  },
-  navRow: {
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-around',
+    height: 170,
   },
-  navIconContainer: {
+  button: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+    margin: 5,
+  },
+  buttonContent: {
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  navIcon: { backgroundColor: colors.white },
-  navIconText: {
+  buttonText: {
+    color: 'white',
+    marginTop: 10,
+    fontSize: 24,
     fontWeight: 'bold',
-    paddingTop: 10,
-    color: colors.black,
-  },
-  activeNavIconText: {
-    fontWeight: 'bold',
-    paddingTop: 10,
-    color: colors.primary,
   },
 });
 

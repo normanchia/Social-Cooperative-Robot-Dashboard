@@ -1,5 +1,8 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useTheme } from 'react-native-paper';
 
 interface HeaderProps {
   home?: boolean;
@@ -7,17 +10,34 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ home = false, headerText }) => {
+  const navigation = useNavigation();
+  const theme = useTheme(); // use the theme hook
+
+  const goBack = () => {
+    navigation.goBack();
+  };
   return (
-    <View style={styles.container}>
-      <View style={styles.leftLayout}>
-        <Text style={styles.headerText}>{headerText}</Text>
-      </View>
+    <View
+      style={{ ...styles.container, backgroundColor: theme.colors.background }}
+    >
+      {!home && (
+        <TouchableOpacity onPress={goBack} style={styles.backButton}>
+          <Icon name="arrow-back" size={40} color={theme.colors.secondary} />
+        </TouchableOpacity>
+      )}
+      {!home && (
+        <View style={styles.leftLayout}>
+          <Text style={{ ...styles.headerText, color: theme.colors.secondary }}>
+            {headerText}
+          </Text>
+        </View>
+      )}
+
       {home && (
-        <View style={styles.rightLayout}>
-          <Image
-            style={styles.profilePic}
-            source={require('../assets/home/userImage.png')}
-          />
+        <View style={{ ...styles.leftLayout, left: 0 }}>
+          <Text style={{ ...styles.headerText, color: theme.colors.secondary }}>
+            {headerText}
+          </Text>
         </View>
       )}
     </View>
@@ -38,16 +58,22 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   leftLayout: {
+    position: 'absolute',
+    top: 2,
+    left: 50,
+    padding: 10,
     marginLeft: 10,
   },
   headerText: {
     fontSize: 25,
     fontWeight: 'bold',
   },
-  profilePic: {
-    height: 45,
-    width: 45,
-    borderRadius: 30,
+  backButton: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    padding: 10,
+    zIndex: 1,
   },
 });
 

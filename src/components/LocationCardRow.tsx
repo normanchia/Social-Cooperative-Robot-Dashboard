@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useTheme } from 'react-native-paper';
 import { colors } from '../styles/styles';
 
 interface Location {
@@ -17,29 +18,43 @@ interface LocationCardRowProps {
 const LocationCardRow: React.FC<LocationCardRowProps> = ({
   location,
   callRobotHandler,
-}) => (
-  <>
-    {location.map(item => (
-      <View key={item.id} style={styles.cardRow}>
-        <Icon
-          size={30}
-          name="location-on"
-          style={styles.cardIcon}
-          color={colors.white}
-        />
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardText}>{item.name}</Text>
-          <Text>{item.distance}</Text>
+}) => {
+  const theme = useTheme(); // use the theme hook
+
+  return (
+    <>
+      {location.map(item => (
+        <View key={item.id} style={styles.cardRow}>
+          <Icon
+            size={30}
+            name="location-on"
+            style={[styles.cardIcon, { backgroundColor: theme.colors.primary }]}
+            color={colors.white}
+          />
+          <View style={styles.cardInfo}>
+            <Text style={[styles.cardText, { color: theme.colors.secondary }]}>
+              {item.name}
+            </Text>
+            <Text style={{ color: theme.colors.secondary }}>
+              {item.distance}
+            </Text>
+          </View>
+          <View>
+            <TouchableOpacity
+              style={[
+                styles.cardBtn,
+                { backgroundColor: theme.colors.primary },
+              ]}
+              onPress={callRobotHandler}
+            >
+              <Text style={styles.cardBtnText}>Go Again</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <View>
-          <TouchableOpacity style={styles.cardBtn} onPress={callRobotHandler}>
-            <Text style={styles.cardBtnText}>Go Again</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    ))}
-  </>
-);
+      ))}
+    </>
+  );
+};
 
 const styles = StyleSheet.create({
   cardRow: {
@@ -62,12 +77,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   cardIcon: {
-    backgroundColor: colors.primary,
     borderRadius: 30,
     padding: 10,
   },
   cardBtn: {
-    backgroundColor: colors.primary,
     borderRadius: 10,
     padding: 10,
     alignItems: 'center',
@@ -78,7 +91,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-export default LocationCardRow;
 
 export default LocationCardRow;

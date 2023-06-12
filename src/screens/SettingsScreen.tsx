@@ -3,7 +3,6 @@ import { View, Text, SafeAreaView } from 'react-native';
 
 import { mainContainer, bodyContainer } from '../styles/styles';
 import Header from '../components/Header';
-import BottomNav from '../components/BottomNav';
 
 const SettingsScreen: React.FC = () => {
   return (
@@ -16,8 +15,6 @@ const SettingsScreen: React.FC = () => {
           <Text>SettingsScreen</Text>
         </View>
       </SafeAreaView>
-      {/* Bottom Nav */}
-      <BottomNav activeRoute={'SettingsScreen'} />
     </>
   );
 };

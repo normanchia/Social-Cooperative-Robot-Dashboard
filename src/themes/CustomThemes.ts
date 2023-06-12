@@ -5,8 +5,9 @@ export const CustomLightTheme = {
   dark: false,
   colors: {
     ...DefaultTheme.colors,
-    primary: 'blue',
-    accent: 'yellow',
+    primary: '#2072b3',
+    background: '#fff',
+    secondary: '#222222',
   },
 };
 
@@ -15,10 +16,10 @@ export const CustomDarkTheme = {
   dark: true,
   colors: {
     ...DefaultTheme.colors,
-    primary: 'black',
+    primary: '#2072b3',
     accent: 'red',
-    background: '#000',
+    background: '#222222',
     surface: '#121212',
-    text: '#fff',
+    secondary: '#ffffff',
   },
 };
