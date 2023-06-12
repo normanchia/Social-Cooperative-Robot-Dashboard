@@ -15,6 +15,7 @@ import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import EditFavouritesModal from '../components/EditFavoritesModal';
 import LocationCardRow from '../components/LocationCardRow';
+import { useTheme } from 'react-native-paper';
 
 //Get: User Recent Location
 const recentLocation = [
@@ -78,6 +79,7 @@ const CallScreen: React.FC = () => {
     null,
   );
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const theme = useTheme(); // use the theme hook
 
   // Handlers
   const callRobotHandler = () => {
@@ -105,22 +107,33 @@ const CallScreen: React.FC = () => {
 
   return (
     <>
-      <SafeAreaView style={mainContainer.container}>
+      <SafeAreaView
+        style={{
+          ...mainContainer.container,
+          backgroundColor: theme.colors.background,
+        }}
+      >
         {/* Header */}
-        <Header headerText={'Where would you like to go ?'} />
+        <Header headerText={'Request Robot'} />
         {/* Main Content */}
         <View style={bodyContainer.container}>
-        {showEditModal && <EditFavouritesModal onSave={toggleEditModal} />}
+          {showEditModal && <EditFavouritesModal onSave={toggleEditModal} />}
           {/* Search bar */}
           <TextInput
             style={styles.searchBar}
             placeholder="Enter Destination"
             value={searchText}
             onChangeText={seacrhTextHandler}
+            placeholderTextColor={theme.colors.secondary}
           />
           {/* Search Results */}
           {dropdownVisible && (
-            <View style={styles.dropdownContainer}>
+            <View
+              style={{
+                ...styles.dropdownContainer,
+                backgroundColor: theme.colors.background,
+              }}
+            >
               <FlatList
                 data={searchResults}
                 keyExtractor={item => item.id.toString()}
@@ -129,15 +142,31 @@ const CallScreen: React.FC = () => {
                     style={styles.dropdownItem}
                     onPress={() => searchResultHandler(item)}
                   >
-                    <Text style={styles.dropdownText}>{item.name}</Text>
+                    <Text
+                      style={{
+                        ...styles.dropdownText,
+                        color: theme.colors.secondary,
+                      }}
+                    >
+                      {item.name}
+                    </Text>
                   </TouchableOpacity>
                 )}
               />
             </View>
           )}
           {/* Recent */}
-          <View style={styles.cardContainer}>
-            <Text style={styles.cardHeading}>Recent</Text>
+          <View
+            style={{
+              ...styles.cardContainer,
+              backgroundColor: theme.colors.background,
+            }}
+          >
+            <Text
+              style={{ ...styles.cardHeading, color: theme.colors.secondary }}
+            >
+              Recent
+            </Text>
             <View style={styles.border} />
             <LocationCardRow
               location={recentLocation}
@@ -145,13 +174,30 @@ const CallScreen: React.FC = () => {
             />
           </View>
           {/* Favourite */}
-          <View style={styles.cardContainer}>
-            <View style={styles.headingRow}>
+          <View
+            style={{
+              ...styles.cardContainer,
+              backgroundColor: theme.colors.background,
+            }}
+          >
+            <View
+              style={{
+                ...styles.headingRow,
+                backgroundColor: theme.colors.background,
+              }}
+            >
               <View style={styles.headingTextContainer}>
-                <Text style={styles.cardHeading}>Favourite</Text>
+                <Text
+                  style={{
+                    ...styles.cardHeading,
+                    color: theme.colors.secondary,
+                  }}
+                >
+                  Favourite
+                </Text>
               </View>
               <TouchableOpacity onPress={toggleEditModal}>
-                <Icon size={30} name="edit" color={colors.black} />
+                <Icon size={30} name="edit" color={theme.colors.secondary} />
               </TouchableOpacity>
             </View>
             <View style={styles.border} />
@@ -162,8 +208,6 @@ const CallScreen: React.FC = () => {
           </View>
         </View>
       </SafeAreaView>
-      {/* Bottom Nav */}
-      <BottomNav activeRoute={'CallScreen'} />
     </>
   );
 };
