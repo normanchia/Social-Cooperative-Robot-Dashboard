@@ -2,10 +2,16 @@ from flask import Flask
 from models import db
 from flask_sqlalchemy import SQLAlchemy
 from credential import host,user,password,database
+from flask_jwt_extended import JWTManager
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://'+user+':@'+host+'/'+database
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database
 db.init_app(app)
+
+# Configure JWT settings
+app.config['JWT_SECRET_KEY'] = 'asdfg1234'  # Replace with your own secret key
+jwt = JWTManager(app)
 
 from user_blueprint import user_blueprint
 from role_blueprint import role_blueprint

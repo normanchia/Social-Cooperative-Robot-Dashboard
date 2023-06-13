@@ -6,3 +6,4 @@ export { default as SettingsScreen } from './SettingsScreen';
 export { default as HelpScreen } from './HelpScreen';
 export { default as LoginScreen } from './LoginScreen';
 export { default as DriverDashboardScreen } from '../screens/Driver/DriverDashboardScreen';
+export { default as RegisterScreen } from './RegisterScreen';
