@@ -22,6 +22,7 @@ import {
   LoginScreen,
   HelpScreen,
   DriverDashboardScreen,
+  RegisterScreen,
 } from './screens';
 
 const Drawer = createDrawerNavigator();
@@ -86,6 +87,8 @@ export default () => {
         /> */}
         {/* Login Screen */}
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
+        {/* Register Screen */}
+        <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
         {/* Driver Dashboard Screen */}
         <Stack.Screen
           name="DriverDashboardScreen"

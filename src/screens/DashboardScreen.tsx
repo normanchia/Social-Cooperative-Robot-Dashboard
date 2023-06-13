@@ -16,8 +16,8 @@ import BottomNav from '../components/BottomNav';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { Platform, PermissionsAndroid } from 'react-native';
-
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ScreenList = {
   LoginScreen: undefined;
@@ -48,11 +48,13 @@ const DashboardScreen: React.FC = () => {
 
   const navigation = useNavigation<NavigationProp<ScreenList>>();
 
-  const handleLogout = () => {
-    // Perform logout authentication here
+  const handleLogout = async () => {
+    // Clear the access token from storage
+    await AsyncStorage.removeItem('access_token');
+
+    // Navigate to the login screen or any other desired screen
     navigation.navigate('LoginScreen');
   };
-
   //Get the user's current location
   const getCurrentLocation = async () => {
     try {
