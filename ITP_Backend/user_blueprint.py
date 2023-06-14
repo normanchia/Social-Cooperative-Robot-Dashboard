@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from models import User, db
-#For JWT Token
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from jwt import ExpiredSignatureError, InvalidTokenError
 
 user_blueprint = Blueprint('user', __name__)
 
@@ -39,4 +39,25 @@ def login():
     else:
         # Authentication failed
         return jsonify({'message': 'Invalid credentials'}), 401
+    
 
+@user_blueprint.route('/profile', methods=['GET'])
+@jwt_required()
+def get_user_profile():
+    try:
+        current_user = get_jwt_identity()
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            user_details = {
+                'user_id': user.user_id,
+                'username': user.username,
+                'address': user.address,
+                'role_id': user.role_id
+            }
+            return jsonify(user_details)
+        else:
+            return jsonify({'message': 'User not found'}), 404
+    except ExpiredSignatureError:
+        return jsonify({'message': 'Expired token'}), 401
+    except InvalidTokenError:
+        return jsonify({'message': 'Invalid token'}), 401
