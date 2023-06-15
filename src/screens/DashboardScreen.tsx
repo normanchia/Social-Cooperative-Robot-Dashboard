@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
 
@@ -18,17 +19,12 @@ import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { Platform, PermissionsAndroid } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { isSameDay, parse } from 'date-fns';
+import ApptCardRow from '../components/ApptCardRow';
 
 type ScreenList = {
   LoginScreen: undefined;
-};
-
-//Get: User's today's appointment
-const todaysAppt = {
-  id: 1,
-  name: 'Medical @TTSH1',
-  location: 'Tan Tock Seng Hospital-1',
-  time: '08:00 am',
 };
 
 interface CurrentLocation {
@@ -38,23 +34,29 @@ interface CurrentLocation {
   longitudeDelta: number;
 }
 
-const DashboardScreen: React.FC = () => {
-  const theme = useTheme(); // use the theme hook
+interface Appointment {
+  appointment_id: number;
+  hospital_id: number;
+  appointment_time: number;
+  appointment_date: string;
+  appointment_title: string;
+}
 
+const DashboardScreen: React.FC = () => {
+  //States
   const [mapContainer, setMapContainer] = useState(false);
   const [currentLocation, setCurrentLocation] =
     useState<CurrentLocation | null>(null);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
+  //Variables
+  const theme = useTheme(); // use the theme hook
   const navigation = useNavigation<NavigationProp<ScreenList>>();
 
-  const handleLogout = async () => {
-    // Clear the access token from storage
-    await AsyncStorage.removeItem('access_token');
-
-    // Navigate to the login screen or any other desired screen
-    navigation.navigate('LoginScreen');
-  };
+  //Handlers
   //Get the user's current location
   const getCurrentLocation = async () => {
     try {
@@ -93,7 +95,7 @@ const DashboardScreen: React.FC = () => {
     }
   };
 
-  // Update the current location
+  //Update the current location
   const handleLocationUpdate = (position: GeoPosition) => {
     const { latitude, longitude } = position.coords;
     setCurrentLocation({
@@ -104,9 +106,83 @@ const DashboardScreen: React.FC = () => {
     });
   };
 
-  //Get the initial location
+  //Logout Handler
+  const handleLogout = async () => {
+    // Clear the access token from storage
+    await AsyncStorage.removeItem('access_token');
+
+    // Navigate to the login screen or any other desired screen
+    navigation.navigate('LoginScreen');
+  };
+
+  //Call Robot Handler
+  const callRobotHandler = () => {
+    // Send request to backend to call robot
+    //Send Driver's current location
+
+    setMapContainer(true);
+    setShowWaitingModal(true);
+
+    // Start waiting timer
+    setTimeout(() => {
+      setShowWaitingModal(false);
+      setMapContainer(false);
+    }, 30000);
+  };
+
+  // Get User's Appointments
+  const fetchAppointments = async (userId: number) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(
+        `http://10.0.2.2:5000/appointment/user/${userId}`,
+      );
+      if (response.status === 200) {
+        const today = new Date();
+        console.log(today);
+        const filteredAppointments = response.data.filter(
+          (appointment: Appointment) =>
+            isSameDay(
+              parse(
+                appointment.appointment_date,
+                "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+                new Date(),
+              ),
+              today,
+            ),
+        );
+        setAppointments(filteredAppointments);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  //Get User Profile
+  const getProfile = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('access_token');
+      if (accessToken) {
+        // Add the access token to the request headers
+        axios.defaults.headers.common[
+          'Authorization'
+        ] = `Bearer ${accessToken}`;
+
+        // Make a GET request to the '/profile' route
+        const response = await axios.get('http://10.0.2.2:5000/profile');
+        setUserProfile(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //useEffect Hook
   useEffect(() => {
     getCurrentLocation();
+    getProfile();
 
     //Watch the location for changes
     const watchId = Geolocation.watchPosition(
@@ -122,19 +198,11 @@ const DashboardScreen: React.FC = () => {
     };
   }, []);
 
-  const callRobotHandler = () => {
-    // Send request to backend to call robot
-    //Send Driver's current location
-
-    setMapContainer(true);
-    setShowWaitingModal(true);
-
-    // Start waiting timer
-    setTimeout(() => {
-      setShowWaitingModal(false);
-      setMapContainer(false);
-    }, 30000);
-  };
+  useEffect(() => {
+    if (userProfile) {
+      fetchAppointments(userProfile.user_id);
+    }
+  }, [userProfile]);
 
   return (
     <>
@@ -183,24 +251,54 @@ const DashboardScreen: React.FC = () => {
           <Text style={{ ...styles.headerText, color: theme.colors.secondary }}>
             Today's Appointment
           </Text>
-          {/* Appointment Card */}
-          <View
-            style={{
-              ...styles.cardContainer,
-              backgroundColor: theme.colors.background,
-            }}
-          >
-            <ApptCardRow appt={[todaysAppt]} />
-            <TouchableOpacity
-              style={{
-                ...styles.cardBtn,
-                backgroundColor: theme.colors.primary,
-              }}
-              onPress={callRobotHandler}
-            >
-              <Text style={styles.cardBtnText}>Call Robot</Text>
-            </TouchableOpacity>
-          </View>
+
+          {isLoading ? (
+            <ActivityIndicator
+              style={{ marginTop: 20 }}
+              size="large"
+              color={theme.colors.primary}
+            />
+          ) : (
+            <>
+              {/* Appointment Cards */}
+              {appointments.length > 0 ? (
+                appointments.map(appointment => (
+                  <View
+                    key={appointment.appointment_id}
+                    style={{
+                      ...styles.cardContainer,
+                      backgroundColor: theme.colors.surface,
+                    }}
+                  >
+                    <ApptCardRow appt={[appointment]} />
+                    <TouchableOpacity
+                      style={{
+                        ...styles.cardBtn,
+                        backgroundColor: theme.colors.primary,
+                      }}
+                      onPress={callRobotHandler}
+                    >
+                      <Text style={styles.cardBtnText}>Call Robot</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              ) : (
+                <View
+                  style={{
+                    ...styles.errorContainer,
+                    backgroundColor: theme.colors.surface,
+                  }}
+                >
+                  <Text
+                    style={{ ...styles.errorText, color: theme.colors.error }}
+                  >
+                    No appointments found for today.
+                  </Text>
+                </View>
+              )}
+            </>
+          )}
+
           <Text style={{ ...styles.headerText, color: theme.colors.secondary }}>
             Actions
           </Text>
@@ -208,44 +306,6 @@ const DashboardScreen: React.FC = () => {
           <BottomNav />
         </ScrollView>
       </SafeAreaView>
-    </>
-  );
-};
-
-interface Appointment {
-  id: number;
-  name: string;
-  location: string;
-  time: string;
-}
-
-interface ApptCardRowProps {
-  appt: Appointment[];
-}
-const ApptCardRow: React.FC<ApptCardRowProps> = ({ appt }) => {
-  const theme = useTheme(); // use the theme hook
-
-  return (
-    <>
-      {appt.map(item => (
-        <View key={item.id}>
-          <Text style={{ ...styles.cardText, color: theme.colors.secondary }}>
-            {item.name}
-          </Text>
-          <Text
-            style={{
-              ...styles.cardText,
-              fontWeight: 'normal',
-              color: theme.colors.secondary,
-            }}
-          >
-            {item.location}
-          </Text>
-          <Text style={{ ...styles.cardText, color: theme.colors.secondary }}>
-            {item.time}
-          </Text>
-        </View>
-      ))}
     </>
   );
 };
@@ -313,6 +373,24 @@ const styles = StyleSheet.create({
     color: colors.white,
     textAlign: 'center',
     marginTop: 140,
+  },
+  errorContainer: {
+    borderRadius: 15,
+    backgroundColor: colors.white,
+    elevation: 5,
+    padding: 10,
+    marginBottom: 20,
+    borderLeftWidth: 5,
+    borderLeftColor: colors.primary,
+    height: 200,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

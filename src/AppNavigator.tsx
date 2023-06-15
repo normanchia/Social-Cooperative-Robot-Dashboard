@@ -13,6 +13,10 @@ import {
   HelpScreen,
   DriverDashboardScreen,
   RegisterScreen,
+  GettingStartedHelpScreen,
+  AccountHelpScreen,
+  AppointmentHelpScreen,
+  RequestHelpScreen,
 } from './screens';
 
 const Drawer = createDrawerNavigator();
@@ -55,6 +59,24 @@ export default () => {
         />
         {/* Help Screen */}
         <Stack.Screen name="HelpScreen" component={HelpScreen} />
+        <Stack.Group>
+          <Stack.Screen
+            name="GettingStartedHelpScreen"
+            component={GettingStartedHelpScreen}
+          />
+          <Stack.Screen
+            name="AccountHelpScreen"
+            component={AccountHelpScreen}
+          />
+          <Stack.Screen
+            name="AppointmentHelpScreen"
+            component={AppointmentHelpScreen}
+          />
+          <Stack.Screen
+            name="RequestHelpScreen"
+            component={RequestHelpScreen}
+          />
+        </Stack.Group>
         {/* Dashboard Screen */}
         <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
         {/* Add Appointment Screen */}
