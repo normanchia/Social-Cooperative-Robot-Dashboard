@@ -6,8 +6,9 @@ export const CustomLightTheme = {
   colors: {
     ...DefaultTheme.colors,
     primary: '#2072b3',
-    background: '#fff',
-    secondary: '#222222',
+    background: '#ffffff', //Background Color
+    secondary: '#222222', //Text Color
+    surface: '#ebebeb', //Card Color
   },
 };
 
@@ -17,9 +18,8 @@ export const CustomDarkTheme = {
   colors: {
     ...DefaultTheme.colors,
     primary: '#2072b3',
-    accent: 'red',
-    background: '#222222',
-    surface: '#121212',
-    secondary: '#ffffff',
+    background: '#222222', //Background Color
+    secondary: '#ffffff', //Text Color
+    surface: '#2b2b2b', //Card Color
   },
 };

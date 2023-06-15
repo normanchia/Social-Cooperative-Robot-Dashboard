@@ -267,7 +267,7 @@ const DashboardScreen: React.FC = () => {
                     key={appointment.appointment_id}
                     style={{
                       ...styles.cardContainer,
-                      backgroundColor: theme.colors.background,
+                      backgroundColor: theme.colors.surface,
                     }}
                   >
                     <ApptCardRow appt={[appointment]} />
@@ -286,7 +286,7 @@ const DashboardScreen: React.FC = () => {
                 <View
                   style={{
                     ...styles.errorContainer,
-                    backgroundColor: theme.colors.background,
+                    backgroundColor: theme.colors.surface,
                   }}
                 >
                   <Text

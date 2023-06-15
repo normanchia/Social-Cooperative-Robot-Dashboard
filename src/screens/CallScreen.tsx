@@ -131,7 +131,7 @@ const CallScreen: React.FC = () => {
             <View
               style={{
                 ...styles.dropdownContainer,
-                backgroundColor: theme.colors.background,
+                backgroundColor: theme.colors.surface,
               }}
             >
               <FlatList
@@ -159,7 +159,7 @@ const CallScreen: React.FC = () => {
           <View
             style={{
               ...styles.cardContainer,
-              backgroundColor: theme.colors.background,
+              backgroundColor: theme.colors.surface,
             }}
           >
             <Text
@@ -177,15 +177,10 @@ const CallScreen: React.FC = () => {
           <View
             style={{
               ...styles.cardContainer,
-              backgroundColor: theme.colors.background,
+              backgroundColor: theme.colors.surface,
             }}
           >
-            <View
-              style={{
-                ...styles.headingRow,
-                backgroundColor: theme.colors.background,
-              }}
-            >
+            <View style={styles.headingRow}>
               <View style={styles.headingTextContainer}>
                 <Text
                   style={{
