@@ -16,7 +16,6 @@ import {
 
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
-import BottomNav from '../components/BottomNav';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { showToast } from '../util/action';
@@ -24,6 +23,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { RelaxView } from '../introduction_animation/scenes';
 import DatePicker from 'react-native-date-picker';
 import { FullWindowOverlay } from 'react-native-screens';
+import { useTheme } from 'react-native-paper';
 
 const AddAppointmentScreen: React.FC = () => {
   const mainScrollViewRef = useRef(null);
@@ -43,7 +43,7 @@ const AddAppointmentScreen: React.FC = () => {
     navigation.navigate('AppointmentScreen', null);
   };
 
-  //   For Dropdown //
+  //   For Location Dropdown //
   const [openLoc, setOpenLocation] = useState(false);
   const [valueLoc, setValueLocation] = useState(null);
   const [itemsLoc, setItemsLocation] = useState([
@@ -108,27 +108,144 @@ const AddAppointmentScreen: React.FC = () => {
     showToast('🏠' + valueLoc + '📅' + dateTime);
   };
 
+  //    Theme stuff //
+  const theme = useTheme();
+  const dropDownTheme = theme.dark ? 'DARK' : 'LIGHT';
+  const styles = StyleSheet.create({
+    flexAlignMiddle: {
+      flex: 1,
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignContent: 'center',
+    },
+    timeText: {
+      fontSize: 40,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      textAlignVertical: 'center',
+      color: theme.colors.secondary,
+    },
+    weekdayText: {
+      textAlign: 'center',
+      fontSize: 22,
+    },
+    dayText: {
+      textAlign: 'center',
+      fontSize: 40,
+      color: theme.colors.secondary,
+      fontWeight: 'bold',
+      // borderWidth: 1,
+      // borderColor: '#e1f',
+    },
+    monthText: {
+      textAlign: 'center',
+      fontSize: 28,
+      marginTop: -10,
+      // borderWidth: 1,
+      // borderColor: '#1ef',
+    },
+    yearText: {
+      textAlign: 'center',
+      fontSize: 22,
+    },
+    dateTimeCardContainer: {
+      flex: 5,
+      aspectRatio: 1,
+      borderRadius: 15,
+      backgroundColor: theme.dark ? theme.colors.primary : '#fff',
+      elevation: 5,
+      padding: 5,
+      marginLeft: 10,
+      marginRight: 10,
+      marginTop: 5,
+      marginBottom: 5,
+    },
+    arrowIcon: {
+      fontSize: 20,
+    },
+    calendarIcon: {
+      textAlign: 'center',
+      fontSize: 50,
+      borderRadius: 30,
+      padding: 10,
+      color: theme.dark ? theme.colors.secondary : '#121',
+    },
+    pickDateTextComp: {
+      // For commented out emojis
+      color: theme.colors.secondary,
+      fontSize: 50,
+      textAlign: 'center',
+      // borderWidth: 1,
+      // borderColor: '#1ef',
+    },
+    pickDateText: {
+      color: theme.dark ? theme.colors.secondary : '#121',
+      fontSize: 20,
+      textAlign: 'center',
+      // fontWeight: 'bold',
+      // borderWidth: 1,
+      // borderColor: '#f1e',
+    },
+    backgroundColorSetWhite: { backgroundColor: theme.colors.background },
+    sectionHeader: {
+      paddingTop: 2,
+      paddingLeft: 10,
+      paddingRight: 10,
+      paddingBottom: 2,
+      fontSize: 20,
+      fontWeight: 'bold',
+      backgroundColor: theme.dark
+        ? theme.colors.surface
+        : 'rgba(245, 245, 245, 1.0)',
+      color: theme.colors.secondary,
+      marginTop: 15,
+      marginLeft: -20,
+      marginRight: -20,
+      marginBottom: 5,
+    },
+
+    placeholderStyleCustom: {
+      borderRadius: 10,
+      backgroundColor: theme.dark ? theme.colors.primary : '',
+      padding: 10,
+    },
+
+    rowStyle: {
+      flexDirection: 'row',
+      // marginTop: 10,
+      alignContent: 'space-around',
+      // borderWidth: 1,
+      // borderColor: '#f1e',
+    },
+
+    buttonDT: { backgroundColor: theme.colors.primary, zIndex: 1000 },
+  });
+
   return (
     <>
-      <SafeAreaView style={mainContainer.container}>
+      <SafeAreaView
+        style={[
+          mainContainer.container,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
         {/* Header */}
-        <Header headerText={'        Add a new appointment!'} />
+        <Header headerText={'Add a new appointment!'} />
         <TouchableOpacity onPress={navigation.goBack}>
-          <Text
-            style={{
-              color: colors.white,
-              borderRadius: 5,
-              position: 'absolute',
-              bottom: 10,
-              left: 10,
-              paddingHorizontal: 5,
-              paddingVertical: 5,
-              fontSize: 25,
-              fontWeight: 'bold',
-            }}
-          >
-            🔙
-          </Text>
+          {/* Add a new appointment header */}
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={navigation.goBack}>
+              <View style={{ paddingRight: 10, paddingLeft: 10 }}>
+                {/* <Icon
+                  name="arrow-back"
+                  style={[
+                    styles.arrowIcon,
+                    { fontSize: 40, color: theme.colors.secondary },
+                  ]}
+                ></Icon> */}
+              </View>
+            </TouchableOpacity>
+          </View>
         </TouchableOpacity>
 
         <ScrollView
@@ -148,8 +265,13 @@ const AddAppointmentScreen: React.FC = () => {
               Appointment Title
             </Text>
             <TextInput
-              style={{ height: 50, fontSize: 15 }}
+              style={{
+                height: 50,
+                fontSize: 20,
+                color: theme.colors.secondary,
+              }}
               placeholder="Click here to add additional title!"
+              placeholderTextColor={theme.colors.secondary}
               multiline
               textAlignVertical="top" // so ios and android same behavior
               maxLength={30} // 30 characters per line
@@ -169,8 +291,11 @@ const AddAppointmentScreen: React.FC = () => {
                 <DropDownPicker
                   placeholder="🏥 Select hospital"
                   placeholderStyle={styles.placeholderStyleCustom}
+                  theme={dropDownTheme}
                   dropDownContainerStyle={{}}
-                  selectedItemContainerStyle={{ backgroundColor: '#C7E5E6' }}
+                  selectedItemContainerStyle={{
+                    backgroundColor: theme.colors.primary,
+                  }}
                   dropDownDirection="AUTO"
                   showTickIcon={true}
                   open={openLoc}
@@ -307,8 +432,13 @@ const AddAppointmentScreen: React.FC = () => {
             {/* Notes */}
             <Text style={styles.sectionHeader}>Notes</Text>
             <TextInput
-              style={{ height: 70 }}
+              style={{
+                height: 100,
+                fontSize: 20,
+                color: theme.colors.secondary,
+              }}
               placeholder="Click here to add additional notes!"
+              placeholderTextColor={theme.colors.secondary}
               multiline
               textAlignVertical="top" // so ios and android same behavior
               maxLength={40} // 40 characters per line
@@ -319,20 +449,6 @@ const AddAppointmentScreen: React.FC = () => {
               // onChangeText={newText => setText(newText)}
               // defaultValue={text}
             />
-
-            <Text style={styles.sectionHeader}>Other options uwu</Text>
-            <Text>Room number? But a lot of options?</Text>
-            <Text>temporary pending feedback</Text>
-            <Text
-              style={{
-                height: 120,
-                width: 20,
-                borderWidth: 1,
-                borderColor: '#4ef',
-              }}
-            >
-              --------------------
-            </Text>
           </View>
         </ScrollView>
 
@@ -363,120 +479,5 @@ const AddAppointmentScreen: React.FC = () => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  flexAlignMiddle: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignContent: 'center',
-  },
-  timeText: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    color: colors.black,
-  },
-  weekdayText: {
-    textAlign: 'center',
-    fontSize: 22,
-  },
-  dayText: {
-    textAlign: 'center',
-    fontSize: 40,
-    color: colors.black,
-    fontWeight: 'bold',
-    // borderWidth: 1,
-    // borderColor: '#e1f',
-  },
-  monthText: {
-    textAlign: 'center',
-    fontSize: 28,
-    marginTop: -10,
-    // borderWidth: 1,
-    // borderColor: '#1ef',
-  },
-  yearText: {
-    textAlign: 'center',
-    fontSize: 22,
-  },
-  dateTimeCardContainer: {
-    flex: 5,
-    aspectRatio: 1,
-    borderRadius: 15,
-    backgroundColor: colors.white,
-    elevation: 5,
-    padding: 5,
-    marginLeft: 10,
-    marginRight: 10,
-    marginTop: 5,
-    marginBottom: 5,
-  },
-  calendarIcon: {
-    textAlign: 'center',
-    fontSize: 50,
-    borderRadius: 30,
-    padding: 10,
-  },
-  pickDateTextComp: {
-    color: colors.black,
-    fontSize: 50,
-    textAlign: 'center',
-    borderWidth: 1,
-    borderColor: '#1ef',
-  },
-  pickDateText: {
-    color: colors.black,
-    fontSize: 20,
-    textAlign: 'center',
-    // fontWeight: 'bold',
-    // borderWidth: 1,
-    // borderColor: '#f1e',
-  },
-  //   dateTimeCardTitle: {
-  //     color: colors.white,
-  //     fontSize: 25,
-  //     flex: 1,
-  //     flexDirection: 'row',
-  //     justifyContent: 'center',
-  //     alignSelf: 'center',
-  //     alignContent: 'center',
-  //     textAlign: 'center',
-  //     textAlignVertical: 'center',
-  //     borderWidth: 1,
-  //     borderColor: '#f1e',
-  //   },
-  backgroundColorSetWhite: { backgroundColor: colors.white },
-  sectionHeader: {
-    paddingTop: 2,
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingBottom: 2,
-    fontSize: 20,
-    fontWeight: 'bold',
-    backgroundColor: 'rgba(245,245,245,1.0)',
-    marginTop: 15,
-    marginLeft: -20,
-    marginRight: -20,
-    marginBottom: 5,
-  },
-
-  placeholderStyleCustom: {
-    borderRadius: 10,
-    backgroundColor: colors.white,
-    padding: 10,
-  },
-
-  rowStyle: {
-    flexDirection: 'row',
-    // marginTop: 10,
-    alignContent: 'space-around',
-    // borderWidth: 1,
-    // borderColor: '#f1e',
-  },
-
-  buttonDT: { backgroundColor: colors.primary, zIndex: 1000 },
-});
 
 export default AddAppointmentScreen;

@@ -1,6 +1,6 @@
 // TODO Fix green border with the appointments
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -20,6 +20,7 @@ import FAB from '../../FAB';
 import { showToast } from '../util/action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useTheme } from 'react-native-paper';
 
 const testToast = () => {
   showToast('This is a test toast 🍞');
@@ -30,6 +31,9 @@ const AppointmentScreen: React.FC = () => {
   const navigateToAddAppt = () => {
     navigation.navigate('AddAppointmentScreen', null);
   };
+
+  // Theme
+  const theme = useTheme();
 
   // For refreshing and updating past appointments
   const wait = (timeout: number) => {
@@ -42,19 +46,19 @@ const AppointmentScreen: React.FC = () => {
       data: [
         {
           location: 'Tan Tock Seng Hospital, Wing B4',
-          dateTime: 'Tuesday, 31 May 2023 @ 09:00',
+          dateTime: 'Tuesday, 31 May 2023 \n09:00',
           notes: '',
           title: 'Routine Checkup',
         },
         {
           location: 'Tan Tock Seng Hospital, Wing 3',
-          dateTime: 'Tuesday, 2 June 2023 @ 10:00',
+          dateTime: 'Tuesday, 2 June 2023 \n10:00',
           notes: '',
           title: 'Reflexologist Specialist',
         },
         {
           location: 'Tan Tock Seng Hospital, Wing B4',
-          dateTime: 'Tuesday, 6 June 2023 @ 09:00',
+          dateTime: 'Tuesday, 6 June 2023 \n09:00',
           notes: 'Please bring along your NRIC',
           title: 'Routine Checkup',
         },
@@ -71,7 +75,7 @@ const AppointmentScreen: React.FC = () => {
         data: [
           {
             location: 'Tan Tock Seng Hospital, Wing 1',
-            dateTime: 'Tuesday, 30 May 2023 @ 15:00',
+            dateTime: 'Tuesday, 30 May 2023 \n15:00',
             notes: '',
             title: 'Radiology',
           },
@@ -99,40 +103,113 @@ const AppointmentScreen: React.FC = () => {
       setRefreshing(false);
     });
   };
+
+  const styles = StyleSheet.create({
+    mainContainerBackgroundColor: {
+      backgroundColor: theme.colors.background,
+    },
+    cardContainer: {
+      borderRadius: 15,
+      backgroundColor: theme.colors.background,
+      elevation: 10,
+      padding: 5,
+      marginLeft: 10,
+      marginRight: 10,
+      marginTop: 5,
+      marginBottom: 5,
+    },
+    cardContainerPast: {
+      backgroundColor: theme.dark
+        ? theme.colors.onBackground
+        : theme.colors.background,
+    },
+    cardContainerUpcoming: {
+      // borderLeftColor: 'mediumseagreen',
+      borderLeftColor: theme.colors.primary,
+      borderLeftWidth: 4,
+      borderRadius: 4.5,
+      left: -5,
+    },
+    cardHeading: {
+      fontSize: 25,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      textDecorationLine: 'underline',
+    },
+    cardRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      margin: 10,
+      paddingVertical: 10,
+    },
+    cardBtn: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 10,
+      padding: 10,
+      alignItems: 'center',
+    },
+    cardBtnText: {
+      color: theme.colors.secondary,
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    apptSectionHeader: {
+      paddingTop: 2,
+      paddingLeft: 10,
+      paddingRight: 10,
+      paddingBottom: 2,
+      fontSize: 20,
+      fontWeight: 'bold',
+      backgroundColor: theme.dark
+        ? theme.colors.surface
+        : 'rgba(245, 245, 245, 1.0)',
+      color: theme.colors.secondary,
+    },
+    apptItem: {
+      color: theme.colors.secondary,
+      padding: 10,
+      fontSize: 18,
+      height: 'auto',
+    },
+    apptNote: {
+      padding: 10,
+      fontSize: 18,
+      height: 'auto',
+      fontWeight: 'bold',
+      color: '#DF3079',
+    },
+    apptItemDateTime: {
+      padding: 10,
+      paddingTop: 5,
+      paddingBottom: 5,
+      fontSize: 28,
+      height: 'auto',
+      color: theme.colors.secondary,
+    },
+    addNewApptBtn: {
+      color: colors.white,
+      borderRadius: 5,
+      position: 'absolute',
+      bottom: 10,
+      right: 10,
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 10,
+      paddingVertical: 10,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+  });
+
   return (
     <>
-      <SafeAreaView style={mainContainer.container}>
+      <SafeAreaView
+        style={[mainContainer.container, styles.mainContainerBackgroundColor]}
+      >
         {/* Header */}
         <Header headerText={'Appointments'} />
         <TouchableOpacity onPress={navigateToAddAppt}>
-          <Text
-            style={{
-              color: colors.white,
-              borderRadius: 5,
-              position: 'absolute',
-              bottom: 10,
-              right: 10,
-              backgroundColor: colors.primary,
-              paddingHorizontal: 10,
-              paddingVertical: 10,
-              fontSize: 16,
-              fontWeight: 'bold',
-            }}
-          >
-            {/* <Image
-              style={{
-                width: 10,
-                height: 10,
-                padding: 10,
-                borderColor: '#998',
-                borderWidth: 5,
-              }}
-              source={{
-                uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADMAAAAzCAYAAAA6oTAqAAAAEXRFWHRTb2Z0d2FyZQBwbmdjcnVzaEB1SfMAAABQSURBVGje7dSxCQBACARB+2/ab8BEeQNhFi6WSYzYLYudDQYGBgYGBgYGBgYGBgYGBgZmcvDqYGBgmhivGQYGBgYGBgYGBgYGBgYGBgbmQw+P/eMrC5UTVAAAAABJRU5ErkJggg==',
-              }}
-            /> */}
-            +{'\u00A0'} Add new Appt
-          </Text>
+          <Text style={[styles.addNewApptBtn]}>+{'\u00A0'} Add new Appt</Text>
         </TouchableOpacity>
 
         {/* Main Content */}
@@ -177,96 +254,9 @@ const AppointmentScreen: React.FC = () => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
-
-        {/* FAB to add new appointments */}
-        {/* <View style={styles.FABcontainer}>
-          <FAB onPress={testToast} title="Add Appt" position="bottom-right" />
-        </View> */}
       </SafeAreaView>
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  cardContainer: {
-    borderRadius: 15,
-    backgroundColor: colors.white,
-    elevation: 5,
-    padding: 5,
-    marginLeft: 10,
-    marginRight: 10,
-    marginTop: 5,
-    marginBottom: 5,
-  },
-  cardContainerPast: { backgroundColor: '#F7F7F8' },
-  cardContainerUpcoming: {
-    borderLeftColor: 'mediumseagreen',
-    borderLeftWidth: 4,
-    borderRadius: 4.5,
-    left: -5,
-  },
-  cardHeading: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-  },
-  cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    margin: 10,
-    paddingVertical: 10,
-  },
-  cardBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    padding: 10,
-    alignItems: 'center',
-  },
-  cardBtnText: {
-    color: colors.white,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  FABcontainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  addIcon: {
-    width: 10,
-    height: 10,
-    paddingRight: 5,
-  },
-  apptSectionHeader: {
-    paddingTop: 2,
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingBottom: 2,
-    fontSize: 20,
-    fontWeight: 'bold',
-    backgroundColor: 'rgba(245,245,245,1.0)',
-  },
-  apptItem: {
-    padding: 10,
-    fontSize: 16,
-    height: 'auto',
-  },
-  apptNote: {
-    padding: 10,
-    fontSize: 15,
-    height: 'auto',
-    fontWeight: 'bold',
-    color: '#DF3079',
-  },
-  apptItemDateTime: {
-    padding: 10,
-    paddingTop: 5,
-    paddingBottom: 5,
-    fontSize: 20,
-    height: 'auto',
-    color: colors.black,
-  },
-});
 
 export default AppointmentScreen;
