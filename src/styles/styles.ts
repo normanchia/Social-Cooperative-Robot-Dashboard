@@ -21,3 +21,14 @@ export const bodyContainer = StyleSheet.create({
     margin: 10,
   },
 });
+
+export const listText = StyleSheet.create({
+  container: {
+    padding: 10,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+  },
+  text: {
+    fontSize: 30,
+  },
+});
