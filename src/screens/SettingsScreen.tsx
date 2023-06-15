@@ -16,7 +16,7 @@ const settingsOptions = [
   { text: 'Account Information', iconName: 'user' },
   { text: 'Preferences', iconName: 'cog' },
   { text: 'Notifications', iconName: 'bell' },
-  { text: 'Help & Support', iconName: 'question-circle' },
+  // { text: 'Help & Support', iconName: 'question-circle' },
   { text: 'Logout', iconName: 'sign-out' },
 ];
 
@@ -24,6 +24,7 @@ const numColumns = 2;
 const size = Dimensions.get('window').width / numColumns;
 
 const SettingsScreen: React.FC = () => {
+  const theme = useTheme(); // use the theme hook
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={{

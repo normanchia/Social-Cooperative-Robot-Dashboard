@@ -69,23 +69,10 @@ const BottomNav: React.FC = () => {
           style={{ ...styles.button, backgroundColor: '#E99E2F' }}
           onPress={() => navigationHandler(4)}
         >
-          <Icon
-            size={35}
-            name="settings"
-            style={styles.navIcon}
-            color={
-              activeRoute === 'SettingsScreen' ? colors.primary : colors.black
-            }
-          />
-          <Text
-            style={
-              activeRoute === 'SettingsScreen'
-                ? styles.activeNavIconText
-                : styles.navIconText
-            }
-          >
-            Settings
-          </Text>
+          <View style={styles.buttonContent}>
+            <Icon size={80} name="settings" color="white" />
+            <Text style={styles.buttonText}>Settings</Text>
+          </View>
         </TouchableOpacity>
       </View>
     </>
