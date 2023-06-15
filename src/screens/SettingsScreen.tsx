@@ -10,7 +10,7 @@ import {
 
 import { mainContainer, bodyContainer } from '../styles/styles';
 import Header from '../components/Header';
-import BottomNav from '../components/BottomNav';
+import { useTheme } from 'react-native-paper';
 
 const settingsOptions = [
   { text: 'Account Information', iconName: 'user' },
@@ -36,10 +36,14 @@ const SettingsScreen: React.FC = () => {
       <Text>{item.text}</Text>
     </TouchableOpacity>
   );
-
   return (
     <>
-      <SafeAreaView style={mainContainer.container}>
+      <SafeAreaView
+        style={{
+          ...mainContainer.container,
+          backgroundColor: theme.colors.background,
+        }}
+      >
         {/* Header */}
         <Header headerText={'Settings'} />
         {/* Main Content */}
@@ -53,8 +57,6 @@ const SettingsScreen: React.FC = () => {
           />
         </View>
       </SafeAreaView>
-      {/* Bottom Nav */}
-      <BottomNav activeRoute={'SettingsScreen'} />
     </>
   );
 };

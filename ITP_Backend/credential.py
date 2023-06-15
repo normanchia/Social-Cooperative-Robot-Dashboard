@@ -1,5 +1,5 @@
-
-username = 'shumin'
-password = 'Letitgo!'
-server = 'se-team10-server.database.windows.net'
-database = 'SE_Team10_DB'
+host = 'localhost'
+user = 'root'
+password = ''
+# password = 'root'
+database = 'itp_team10_se'

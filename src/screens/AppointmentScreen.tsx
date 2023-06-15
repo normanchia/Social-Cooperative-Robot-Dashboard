@@ -183,9 +183,6 @@ const AppointmentScreen: React.FC = () => {
           <FAB onPress={testToast} title="Add Appt" position="bottom-right" />
         </View> */}
       </SafeAreaView>
-
-      {/* Bottom Nav */}
-      <BottomNav activeRoute={'AppointmentScreen'} />
     </>
   );
 };

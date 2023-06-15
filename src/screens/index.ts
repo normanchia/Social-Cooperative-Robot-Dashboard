@@ -1,5 +1,13 @@
 export { default as DashboardScreen } from './DashboardScreen';
-export { default as AddAppointmentScreen } from './AddAppointmentScreen';
 export { default as AppointmentScreen } from './AppointmentScreen';
+export { default as AddAppointmentScreen } from './AddAppointmentScreen';
 export { default as CallScreen } from './CallScreen';
 export { default as SettingsScreen } from './SettingsScreen';
+export { default as HelpScreen } from './Help/HelpScreen';
+export { default as LoginScreen } from './LoginScreen';
+export { default as DriverDashboardScreen } from '../screens/Driver/DriverDashboardScreen';
+export { default as RegisterScreen } from './RegisterScreen';
+export { default as GettingStartedHelpScreen } from '../screens/Help/GettingStartedHelpScreen';
+export { default as AccountHelpScreen } from '../screens/Help/AccountHelpScreen';
+export { default as AppointmentHelpScreen } from '../screens/Help/AppointmentHelpScreen';
+export { default as RequestHelpScreen } from '../screens/Help/RequestHelpScreen';
