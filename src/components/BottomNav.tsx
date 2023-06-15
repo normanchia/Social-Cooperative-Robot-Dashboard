@@ -131,7 +131,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
                 : styles.navIconText
             }
           >
-            settings
+            Settings
           </Text>
         </TouchableOpacity>
       </View>
