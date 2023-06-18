@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,59 +16,67 @@ import BottomNav from '../components/BottomNav';
 import EditFavouritesModal from '../components/EditFavoritesModal';
 import LocationCardRow from '../components/LocationCardRow';
 import { useTheme } from 'react-native-paper';
+import axios from 'axios';
+
+interface Station {
+  station_id: number;
+  station_name: string;
+  station_location: string;
+}
 
 //Get: User Recent Location
 const recentLocation = [
-  {
-    id: 1,
-    name: 'Blk 223 Bus Stop',
-    distance: '300m away',
-  },
-  {
-    id: 2,
-    name: 'Blk 220 Garden',
-    distance: '200m away',
-  },
+  // {
+  //   id: 1,
+  //   name: 'Blk 223 Bus Stop',
+  //   distance: '300m away',
+  // },
+  // {
+  //   id: 2,
+  //   name: 'Blk 220 Garden',
+  //   distance: '200m away',
+  // },
 ];
 
 //Get: User Favourite Location
 const favouriteLocation = [
-  {
-    id: 1,
-    name: 'Blk 223 Bus Stop',
-    distance: '300m away',
-  },
-  {
-    id: 2,
-    name: 'Amk CC',
-    distance: '500m away',
-  },
+  // {
+  //   id: 1,
+  //   name: 'Blk 223 Bus Stop',
+  //   distance: '300m away',
+  // },
+  // {
+  //   id: 2,
+  //   name: 'Amk CC',
+  //   distance: '500m away',
+  // },
 ];
 
 // Get: All Location
-const allLocations = [
-  {
-    id: 1,
-    name: 'Blk 444 Bus Stop',
-  },
-  {
-    id: 2,
-    name: 'Blk 220 Garden',
-  },
-  {
-    id: 3,
-    name: 'Blk 223 Bus Stop',
-  },
-  {
-    id: 4,
-    name: 'Amk CC',
-  },
-];
+// const allLocations = [
+//   {
+//     id: 1,
+//     name: 'Blk 444 Bus Stop',
+//   },
+//   {
+//     id: 2,
+//     name: 'Blk 220 Garden',
+//   },
+//   {
+//     id: 3,
+//     name: 'Blk 223 Bus Stop',
+//   },
+//   {
+//     id: 4,
+//     name: 'Amk CC',
+//   },
+// ];
 
 interface Location {
   id: number;
   name: string;
 }
+
 
 const CallScreen: React.FC = () => {
   // States
@@ -80,6 +88,26 @@ const CallScreen: React.FC = () => {
   );
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const theme = useTheme(); // use the theme hook
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [stations, setStations] = useState<Station[]>([]);
+
+  // Get: All Station
+  const fetchStations = async (userId: number) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(
+        `http://10.0.2.2:5000/robotstations`,
+      );
+      if (response.status === 200) {
+        setStations(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Handlers
   const callRobotHandler = () => {
@@ -104,6 +132,10 @@ const CallScreen: React.FC = () => {
     setSearchText(item.name);
     setDropdownVisible(false);
   };
+
+  useEffect(() => {
+    fetchStations();
+  }, []);
 
   return (
     <>
@@ -165,15 +197,15 @@ const CallScreen: React.FC = () => {
             <Text
               style={{ ...styles.cardHeading, color: theme.colors.secondary }}
             >
-              Recent
+              All Robots
             </Text>
             <View style={styles.border} />
             <LocationCardRow
-              location={recentLocation}
+              location={stations}
               callRobotHandler={callRobotHandler}
             />
           </View>
-          {/* Favourite */}
+          {/* Favourite
           <View
             style={{
               ...styles.cardContainer,
@@ -200,7 +232,7 @@ const CallScreen: React.FC = () => {
               location={favouriteLocation}
               callRobotHandler={callRobotHandler}
             />
-          </View>
+          </View> */}
         </View>
       </SafeAreaView>
     </>

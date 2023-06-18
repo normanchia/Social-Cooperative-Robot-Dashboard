@@ -4,14 +4,14 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from 'react-native-paper';
 import { colors } from '../styles/styles';
 
-interface Location {
-  id: number;
-  name: string;
-  distance: string;
+interface Station {
+  station_id: number;
+  station_name: string;
+  station_location: string;
 }
 
 interface LocationCardRowProps {
-  location: Location[];
+  location: Station[];
   callRobotHandler: () => void;
 }
 
@@ -24,7 +24,7 @@ const LocationCardRow: React.FC<LocationCardRowProps> = ({
   return (
     <>
       {location.map(item => (
-        <View key={item.id} style={styles.cardRow}>
+        <View key={item.station_id} style={styles.cardRow}>
           <Icon
             size={30}
             name="location-on"
@@ -33,10 +33,10 @@ const LocationCardRow: React.FC<LocationCardRowProps> = ({
           />
           <View style={styles.cardInfo}>
             <Text style={[styles.cardText, { color: theme.colors.secondary }]}>
-              {item.name}
+              {item.station_name}
             </Text>
             <Text style={{ color: theme.colors.secondary }}>
-              {item.distance}
+              {item.station_location}
             </Text>
           </View>
           <View>

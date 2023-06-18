@@ -29,3 +29,15 @@ class Appointment(db.Model):
     appointment_date = db.Column(db.DateTime, nullable=False)
     additional_note = db.Column(db.Text, nullable=True)
     appointment_title = db.Column(db.String(100), nullable=False)
+
+class RobotStation(db.Model):
+    station_id = db.Column(db.Integer, primary_key=True)
+    station_name = db.Column(db.String(255))
+    station_location = db.Column(db.String(255))
+
+class Robot(db.Model):
+    robot_id = db.Column(db.Integer, primary_key=True)
+    robot_name = db.Column(db.String(128))
+    robot_status = db.Column(db.Integer)
+    robot_destination = db.Column(db.Integer, db.ForeignKey('RobotStation.station_id'))
+    robot_pickup = db.Column(db.Integer, db.ForeignKey('RobotStation.station_id'))
