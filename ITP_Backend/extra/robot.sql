@@ -10,8 +10,8 @@ CREATE TABLE robot (
 
 INSERT INTO Robot (robot_name, robot_status, robot_destination, robot_pickup)
 VALUES
-('Robot1', 'Idle', NULL, NULL),
-('Robot2', 'Idle', NULL, NULL),
-('Robot3', 'Idle', NULL, NULL),
-('Robot4', 'Moving', 1, 2),
-('Robot5', 'Moving', 3, 4);
+('Robot1', 0, NULL, NULL),
+('Robot2', 0, NULL, NULL),
+('Robot3', 0, NULL, NULL),
+('Robot4', 1, 1, 2),
+('Robot5', 1, 3, 4);
