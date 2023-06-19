@@ -206,7 +206,7 @@ const AddAppointmentScreen: React.FC = () => {
 
     placeholderStyleCustom: {
       borderRadius: 10,
-      backgroundColor: theme.dark ? theme.colors.primary : '',
+      backgroundColor: theme.dark ? theme.colors.primary : 'transparent',
       padding: 10,
     },
 

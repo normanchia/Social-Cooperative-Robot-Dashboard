@@ -10,6 +10,7 @@ import {
   Image,
   SectionList,
   RefreshControl,
+  SectionListData,
 } from 'react-native';
 
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
@@ -19,52 +20,200 @@ import { ScrollView } from 'react-native-gesture-handler';
 import FAB from '../../FAB';
 import { showToast } from '../util/action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import {
+  useNavigation,
+  NavigationProp,
+  useRoute,
+} from '@react-navigation/native';
 import { useTheme } from 'react-native-paper';
+import axios from 'axios';
+import { format, isAfter, isBefore, isSameDay, parse } from 'date-fns';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const testToast = () => {
   showToast('This is a test toast 🍞');
 };
+
+interface Appointment {
+  appointment_id: number;
+  hospital_id: number;
+  hospital_name: string;
+  appointment_time: number;
+  appointment_date: string;
+  additional_note: string;
+  appointment_title: string;
+}
 
 const AppointmentScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<Record<string, null>>>();
   const navigateToAddAppt = () => {
     navigation.navigate('AddAppointmentScreen', null);
   };
-
   // Theme
   const theme = useTheme();
+  // For getting past and upcoming appointments from backend
+  const [pastAppointments, setPastAppointments] = useState<Appointment[]>([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<
+    Appointment[]
+  >([]);
+
+  const fetchHospitalNames = async (hospitalId: number) => {
+    try {
+      const response = await axios.get(
+        `http://10.0.2.2:5000/hospital/${hospitalId}`,
+      );
+      if (response.status === 200) {
+        const { hospital_name } = response.data;
+        return hospital_name;
+      }
+    } catch (error) {
+      console.error('ApptScreen fetchHospitalNames:', error);
+    }
+  };
+
+  const fetchAppointments = async (userId: number) => {
+    try {
+      // setIsLoading(true);
+      const response = await axios.get(
+        `http://10.0.2.2:5000/appointment/user/${userId}`,
+      );
+      if (response.status === 200) {
+        const today = new Date();
+        const allAppointments = response.data;
+
+        // Filter appointments before today
+        const appointmentsBeforeToday = allAppointments.filter(
+          (appointment: Appointment) => {
+            const appointmentDate = parse(
+              appointment.appointment_date,
+              "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+              new Date(),
+            );
+            return isBefore(appointmentDate, today);
+          },
+        );
+
+        // Filter appointments after today
+        const appointmentsAfterToday = allAppointments.filter(
+          (appointment: Appointment) => {
+            const appointmentDate = parse(
+              appointment.appointment_date,
+              "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+              new Date(),
+            );
+            return isAfter(appointmentDate, today);
+          },
+        );
+        setPastAppointments(appointmentsBeforeToday);
+        setUpcomingAppointments(appointmentsAfterToday);
+      }
+    } catch (error) {
+      console.log('AppointmentScreen:', error);
+    } finally {
+      // setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Get appointments for the user
+    AsyncStorage.getItem('userProfileID').then(ID => {
+      if (ID != null) {
+        console.log(' ===== Parsed userID', ID, 'to appt page =====');
+        fetchAppointments(parseInt(ID));
+        // console.log('Past appt details:', pastAppointments);
+        // fetchHospitalNames(2);
+      }
+    });
+  }, []);
 
   // For refreshing and updating past appointments
   const wait = (timeout: number) => {
     return new Promise<void>(resolve => setTimeout(resolve, timeout));
   };
   const [refreshing, setRefreshing] = useState(false);
-  const [sectionsUpcomingAppt, setSections] = useState([
-    {
+  const [sectionsUpcomingAppointment, setSectionsUpcomingAppt] = useState<
+    SectionListData<any, {}>[]
+  >([]);
+  const [sectionsPastAppointment, setSectionsPastAppt] = useState<
+    SectionListData<any, {}>[]
+  >([]);
+
+  //  === Formatting data to be useable in SectionLists ===
+  const formatTime = (time: number) => {
+    const ms = time * 1000;
+    const tmpDate = new Date(ms);
+    const formattedTime = tmpDate.toLocaleTimeString('en-US', {
+      timeZone: 'UTC',
+      hour12: true,
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return formattedTime;
+  };
+
+  const formatDate = (dateString: string) => {
+    const fullDate = new Date(dateString);
+    const formattedDate = fullDate.toLocaleDateString('en-SG', {
+      timeZone: 'UTC',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+    const day = fullDate.toLocaleDateString('en-SG', {
+      timeZone: 'UTC',
+      weekday: 'long',
+    });
+    let regex = /[A-Za-z]+/i;
+    const formattedDay = regex.exec(day);
+
+    return `${formattedDate} (${formattedDay})`;
+  };
+
+  const formatSectionData = async () => {
+    const pastAppointmentsData = {
+      title: 'Past Appointments',
+      data: await Promise.all(
+        pastAppointments.map(async appointment => {
+          const hospitalName = await fetchHospitalNames(
+            appointment.hospital_id,
+          );
+          return {
+            appointment_id: appointment.appointment_id,
+            hospital_name: hospitalName,
+            appointment_date: formatDate(appointment.appointment_date),
+            appointment_time: formatTime(appointment.appointment_time),
+            additional_note: appointment.additional_note,
+            appointment_title: appointment.appointment_title,
+          };
+        }),
+      ),
+    };
+    const upcomingAppointmentsData = {
       title: 'Upcoming Appointments',
-      data: [
-        {
-          location: 'Tan Tock Seng Hospital, Wing B4',
-          dateTime: 'Tuesday, 31 May 2023 \n09:00',
-          notes: '',
-          title: 'Routine Checkup',
-        },
-        {
-          location: 'Tan Tock Seng Hospital, Wing 3',
-          dateTime: 'Tuesday, 2 June 2023 \n10:00',
-          notes: '',
-          title: 'Reflexologist Specialist',
-        },
-        {
-          location: 'Tan Tock Seng Hospital, Wing B4',
-          dateTime: 'Tuesday, 6 June 2023 \n09:00',
-          notes: 'Please bring along your NRIC',
-          title: 'Routine Checkup',
-        },
-      ],
-    },
-  ]);
+      data: await Promise.all(
+        upcomingAppointments.map(async appointment => {
+          const hospitalName = await fetchHospitalNames(
+            appointment.hospital_id,
+          );
+          return {
+            appointment_id: appointment.appointment_id,
+            hospital_name: hospitalName,
+            appointment_date: formatDate(appointment.appointment_date),
+            appointment_time: formatTime(appointment.appointment_time),
+            additional_note: appointment.additional_note,
+            appointment_title: appointment.appointment_title,
+          };
+        }),
+      ),
+    };
+
+    setSectionsPastAppt([pastAppointmentsData]);
+    setSectionsUpcomingAppt([upcomingAppointmentsData]);
+  };
+
+  useEffect(() => {
+    formatSectionData();
+  }, [pastAppointments, upcomingAppointments]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -75,7 +224,7 @@ const AppointmentScreen: React.FC = () => {
         data: [
           {
             location: 'Tan Tock Seng Hospital, Wing 1',
-            dateTime: 'Tuesday, 30 May 2023 \n15:00',
+            dateTime: 'Tuesday, 30 May 2023 @ 15:00',
             notes: '',
             title: 'Radiology',
           },
@@ -83,18 +232,20 @@ const AppointmentScreen: React.FC = () => {
       };
 
       // Set section code to add past appointments to the list, but only 1 copy even if the user refresh multiple times
-      setSections(prevSection => {
+      setSectionsUpcomingAppt(prevSection => {
         // Check if 'Past Appointments' section already exists
         const pastAppointmentsIndex = prevSection.findIndex(
-          section => section.title === 'Past Appointments',
+          (section: SectionListData<any>) =>
+            section.title === 'Past Appointments',
         );
 
         if (pastAppointmentsIndex !== -1) {
           // Past Appointments section already exists, replace it
-          prevSection[pastAppointmentsIndex] = sectionsPastAppt;
+          prevSection[pastAppointmentsIndex].data =
+            sectionsPastAppointment[0].data;
         } else {
           // Past Appointment section doesn't exist, add to start of list
-          prevSection.unshift(sectionsPastAppt);
+          prevSection.unshift(sectionsPastAppointment[0]);
         }
 
         return [...prevSection];
@@ -214,7 +365,9 @@ const AppointmentScreen: React.FC = () => {
 
         {/* Main Content */}
         <SectionList
-          sections={sectionsUpcomingAppt}
+          sections={
+            sectionsUpcomingAppointment as SectionListData<Appointment>[]
+          }
           renderItem={({ item, section }) => (
             // Render each item
             <View
@@ -231,17 +384,24 @@ const AppointmentScreen: React.FC = () => {
                     : styles.cardContainerPast
                 }
               >
-                <Text style={styles.apptItemDateTime}>{item.dateTime}</Text>
+                <Text style={styles.apptItemDateTime}>
+                  {item.appointment_date}
+                </Text>
+                <Text style={styles.apptItemDateTime}>
+                  {item.appointment_time}
+                </Text>
                 <Text style={styles.apptItem}>
-                  {item.title} @{item.location}
+                  {item.appointment_title} @{item.hospital_name}
                 </Text>
 
                 <Text
                   style={
-                    item.notes === '' ? { display: 'none' } : styles.apptNote
+                    item.additional_note === ''
+                      ? { display: 'none' }
+                      : styles.apptNote
                   }
                 >
-                  {item.notes}
+                  {item.additional_note}
                 </Text>
               </View>
             </View>
@@ -249,7 +409,7 @@ const AppointmentScreen: React.FC = () => {
           renderSectionHeader={({ section }) => (
             <Text style={styles.apptSectionHeader}>{section.title}</Text>
           )}
-          keyExtractor={item => `basicListEntry-${item.dateTime}`}
+          keyExtractor={item => `basicListEntry-${item.appointment_id}`}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }

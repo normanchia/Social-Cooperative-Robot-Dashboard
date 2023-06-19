@@ -201,6 +201,7 @@ const DashboardScreen: React.FC = () => {
   useEffect(() => {
     if (userProfile) {
       fetchAppointments(userProfile.user_id);
+      AsyncStorage.setItem('userProfileID', userProfile.user_id.toString()); // Stored locally to use in appt screen
     }
   }, [userProfile]);
 
