@@ -159,8 +159,8 @@ const AddAppointmentScreen: React.FC = () => {
     const appointmentData = {
       hospital_id: valueLoc,
       user_id: userID,
-      reminder_time: null,
-      reminder_date: null,
+      reminder_time: timeServer, //   ========== CHANGE REMINDER_TIME ==========
+      reminder_date: dateServer, //   ========== CHANGE REMINDER_DATE ==========
       appointment_time: timeServer,
       appointment_date: dateServer,
       additional_note: notesValue,
