@@ -48,7 +48,7 @@ class Robot(db.Model):
     robot_id = db.Column(db.Integer, primary_key=True)
     robot_name = db.Column(db.String(128))
     robot_status = db.Column(db.Integer)
-    station_location = db.Column(db.Integer, db.ForeignKey('RobotStation.station_id'))
+    station_location = db.Column(db.Integer, db.ForeignKey('robot_station.station_id'))
 
 class Robot_Request(db.Model):
     __tablename__ = 'robot_request'

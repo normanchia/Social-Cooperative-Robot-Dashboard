@@ -8,8 +8,10 @@ interface Robot_Request {
     user_id: number;
     request_status: number;
     request_id: number;
-    pickup_station: string;
-    destination_station: string;
+    pickup_station_name: string;
+    destination_station_name: string;
+    pickup_station_id: number;
+    destination_station_id: number;
     robot_id: number;
   }
 
@@ -48,7 +50,7 @@ const RequestCardRow: React.FC<RequestCardRowProps> = ({
               {statusMapping[item.request_status]}
             </Text>
             <Text style={{ color: theme.colors.secondary }}>
-              {item.pickup_station} - {item.destination_station} 
+              {item.pickup_station_name} - {item.destination_station_name} 
             </Text>
 
           </View>
@@ -59,7 +61,7 @@ const RequestCardRow: React.FC<RequestCardRowProps> = ({
                 { backgroundColor: theme.colors.primary },
               ]}
               onPress={() => {
-                console.log("Calling completeHandler with item.request_id:", item.request_id); // Add this line
+                console.log("Calling completeHandler with item.request_id:", item.request_id);
                 completeHandler(item);
               }}              >
               <Text style={styles.cardBtnText}>Complete</Text>

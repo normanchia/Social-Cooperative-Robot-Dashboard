@@ -1,6 +1,6 @@
 # robot.py
 from flask import Blueprint, jsonify, request
-from models import Robot, db
+from models import Robot,RobotStation, db
 
 robot_blueprint = Blueprint('robot', __name__)
 

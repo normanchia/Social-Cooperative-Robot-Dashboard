@@ -12,7 +12,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { showToast } from '../util/action';
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
-import BottomNav from '../components/BottomNav';
 import EditFavouritesModal from '../components/EditFavoritesModal';
 import LocationCardRow from '../components/LocationCardRow';
 import RequestCardRow from '../components/RequestCardRow';
@@ -23,9 +22,11 @@ interface Robot_Request {
   user_id: number;
   request_status: number;
   request_id: number;
-  pickup_station: string;
-  destination_station: string;
+  pickup_station_name: string;
+  destination_station_name: string;
   robot_id: number;
+  pickup_station_id: number;
+  destination_station_id: number;
 }
 
 interface Station {
@@ -118,17 +119,18 @@ const completeHandler = async (request: Robot_Request) => {
 
       // Call the robot/station API endpoint
       const updateRobotStationResponse = await axios.put(
-        `http://10.0.2.2:5000/robot/${request.robot_id}/station/${request.destination_station}`
+        `http://10.0.2.2:5000/robot/${request.robot_id}/station/${request.destination_station_id}`
       );
       if(updateRobotStationResponse.status === 200){
         showToast('Robot and station updated successfully.');
         // You can update your state related to robot or station here, if necessary
+        fetchStations();
       } else {
         showToast('Failed to update robot and station.');
       }
 
       // Call the update_slots API endpoint
-      const updateSlotsResponse = await axios.post(`http://10.0.2.2:5000/update_slots`);
+      const updateSlotsResponse = await axios.put(`http://10.0.2.2:5000/update_slots`);
       if(updateSlotsResponse.status === 200){
         showToast('Slots updated successfully.');
         // You can update your state related to slots here, if necessary
