@@ -17,18 +17,18 @@ import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import { ScrollView } from 'react-native-gesture-handler';
-import FAB from '../../FAB';
 import { showToast } from '../util/action';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   useNavigation,
   NavigationProp,
   useRoute,
+  ParamListBase,
 } from '@react-navigation/native';
-import { useTheme } from 'react-native-paper';
+import { ActivityIndicator, useTheme } from 'react-native-paper';
 import axios from 'axios';
 import { format, isAfter, isBefore, isSameDay, parse } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ApptDialog from '../components/ApptDialog';
 
 const testToast = () => {
   showToast('This is a test toast 🍞');
@@ -45,9 +45,11 @@ interface Appointment {
 }
 
 const AppointmentScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp<Record<string, null>>>();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const navigateToAddAppt = () => {
-    navigation.navigate('AddAppointmentScreen', null);
+    navigation.navigate('AddAppointmentScreen', {
+      screenIntent: 'addAppointment',
+    });
   };
   // Theme
   const theme = useTheme();
@@ -73,7 +75,6 @@ const AppointmentScreen: React.FC = () => {
 
   const fetchAppointments = async (userId: number) => {
     try {
-      // setIsLoading(true);
       const response = await axios.get(
         `http://10.0.2.2:5000/appointment/user/${userId}`,
       );
@@ -109,8 +110,6 @@ const AppointmentScreen: React.FC = () => {
       }
     } catch (error) {
       console.log('AppointmentScreen:', error);
-    } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -120,17 +119,18 @@ const AppointmentScreen: React.FC = () => {
       if (ID != null) {
         console.log(' ===== Parsed userID', ID, 'to appt page =====');
         fetchAppointments(parseInt(ID));
-        // console.log('Past appt details:', pastAppointments);
-        // fetchHospitalNames(2);
+        setLoading(false);
       }
     });
   }, []);
 
+  //          ===== SECTION LIST =====
   // For refreshing and updating past appointments
   const wait = (timeout: number) => {
     return new Promise<void>(resolve => setTimeout(resolve, timeout));
   };
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); // SectionList refresh to get past appt
+  const [loading, setLoading] = useState(true); // loading indicator when first visit page
   const [sectionsUpcomingAppointment, setSectionsUpcomingAppt] = useState<
     SectionListData<any, {}>[]
   >([]);
@@ -179,6 +179,7 @@ const AppointmentScreen: React.FC = () => {
           );
           return {
             appointment_id: appointment.appointment_id,
+            hospital_id: appointment.hospital_id,
             hospital_name: hospitalName,
             appointment_date: formatDate(appointment.appointment_date),
             appointment_time: formatTime(appointment.appointment_time),
@@ -197,6 +198,7 @@ const AppointmentScreen: React.FC = () => {
           );
           return {
             appointment_id: appointment.appointment_id,
+            hospital_id: appointment.hospital_id,
             hospital_name: hospitalName,
             appointment_date: formatDate(appointment.appointment_date),
             appointment_time: formatTime(appointment.appointment_time),
@@ -216,21 +218,9 @@ const AppointmentScreen: React.FC = () => {
   }, [pastAppointments, upcomingAppointments]);
 
   const onRefresh = () => {
+    // Section List pull down to get past appointments
     setRefreshing(true);
     wait(1000).then(() => {
-      // Pull data from database here, this is just dummy data
-      const sectionsPastAppt = {
-        title: 'Past Appointments',
-        data: [
-          {
-            location: 'Tan Tock Seng Hospital, Wing 1',
-            dateTime: 'Tuesday, 30 May 2023 @ 15:00',
-            notes: '',
-            title: 'Radiology',
-          },
-        ],
-      };
-
       // Set section code to add past appointments to the list, but only 1 copy even if the user refresh multiple times
       setSectionsUpcomingAppt(prevSection => {
         // Check if 'Past Appointments' section already exists
@@ -253,6 +243,16 @@ const AppointmentScreen: React.FC = () => {
 
       setRefreshing(false);
     });
+  };
+
+  // Dialog box
+  const [isDialogVisible, setDialogVisible] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+  const onApptCardTap = (item: Appointment) => {
+    // console.log(item);
+    setSelectedAppointment(item);
+    setDialogVisible(true);
   };
 
   const styles = StyleSheet.create({
@@ -363,57 +363,81 @@ const AppointmentScreen: React.FC = () => {
           <Text style={[styles.addNewApptBtn]}>+{'\u00A0'} Add new Appt</Text>
         </TouchableOpacity>
 
-        {/* Main Content */}
-        <SectionList
-          sections={
-            sectionsUpcomingAppointment as SectionListData<Appointment>[]
-          }
-          renderItem={({ item, section }) => (
-            // Render each item
-            <View
-              style={
-                section.title === 'Upcoming Appointments'
-                  ? [styles.cardContainer]
-                  : [styles.cardContainer, styles.cardContainerPast]
-              }
-            >
-              <View
+        {/* ===== MAIN CONTENT ===== */}
+
+        {/* SectionList */}
+        {loading ? (
+          <ActivityIndicator
+            style={{ marginTop: 20 }}
+            size={'large'}
+            color={theme.colors.primary}
+          />
+        ) : (
+          <SectionList
+            sections={
+              sectionsUpcomingAppointment as SectionListData<Appointment>[]
+            }
+            renderItem={({ item, section }) => (
+              // Render each item
+              <TouchableOpacity
+                onPress={() => onApptCardTap(item)}
                 style={
                   section.title === 'Upcoming Appointments'
-                    ? styles.cardContainerUpcoming
-                    : styles.cardContainerPast
+                    ? [styles.cardContainer]
+                    : [styles.cardContainer, styles.cardContainerPast]
                 }
               >
-                <Text style={styles.apptItemDateTime}>
-                  {item.appointment_date}
-                </Text>
-                <Text style={styles.apptItemDateTime}>
-                  {item.appointment_time}
-                </Text>
-                <Text style={styles.apptItem}>
-                  {item.appointment_title} @{item.hospital_name}
-                </Text>
+                {/* Content in each card */}
+                <View>
+                  <View
+                    style={
+                      section.title === 'Upcoming Appointments'
+                        ? styles.cardContainerUpcoming
+                        : styles.cardContainerPast
+                    }
+                  >
+                    <Text style={styles.apptItemDateTime}>
+                      {item.appointment_date}
+                    </Text>
+                    <Text style={styles.apptItemDateTime}>
+                      {item.appointment_time}
+                    </Text>
+                    <Text style={styles.apptItem}>
+                      {item.appointment_title} @{item.hospital_name}
+                    </Text>
 
-                <Text
-                  style={
-                    item.additional_note === ''
-                      ? { display: 'none' }
-                      : styles.apptNote
-                  }
-                >
-                  {item.additional_note}
-                </Text>
-              </View>
-            </View>
-          )}
-          renderSectionHeader={({ section }) => (
-            <Text style={styles.apptSectionHeader}>{section.title}</Text>
-          )}
-          keyExtractor={item => `basicListEntry-${item.appointment_id}`}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        />
+                    <Text
+                      style={
+                        item.additional_note === ''
+                          ? { display: 'none' }
+                          : styles.apptNote
+                      }
+                    >
+                      {item.additional_note}
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
+            renderSectionHeader={({ section }) => (
+              <Text style={styles.apptSectionHeader}>{section.title}</Text>
+            )}
+            keyExtractor={item => `basicListEntry-${item.appointment_id}`}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          />
+        )}
+
+        {/* Dialogbox */}
+        {isDialogVisible ? (
+          <ApptDialog
+            appt={selectedAppointment}
+            onClose={() => setDialogVisible(false)}
+          />
+        ) : (
+          <></>
+        )}
       </SafeAreaView>
     </>
   );
