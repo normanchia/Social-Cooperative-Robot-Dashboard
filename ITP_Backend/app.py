@@ -18,6 +18,7 @@ from hospital_blueprint import hospital_blueprint
 from appointment_blueprint import appointment_blueprint
 from robotstation_blueprint import robotstation_blueprint
 from robot_blueprint import robot_blueprint
+from robot_request_blueprint import robot_request_blueprint
 
 app.register_blueprint(user_blueprint)
 app.register_blueprint(role_blueprint)
@@ -25,6 +26,7 @@ app.register_blueprint(hospital_blueprint)
 app.register_blueprint(appointment_blueprint)
 app.register_blueprint(robotstation_blueprint)
 app.register_blueprint(robot_blueprint)
+app.register_blueprint(robot_request_blueprint)
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -15,62 +15,26 @@ import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import EditFavouritesModal from '../components/EditFavoritesModal';
 import LocationCardRow from '../components/LocationCardRow';
+import RequestCardRow from '../components/RequestCardRow';
 import { useTheme } from 'react-native-paper';
 import axios from 'axios';
+
+interface Robot_Request {
+  user_id: number;
+  request_status: number;
+  request_id: number;
+  pickup_station: string;
+  destination_station: string;
+  robot_id: number;
+}
 
 interface Station {
   station_id: number;
   station_name: string;
   station_location: string;
+  slot_available: number;
+  total_slot: number;
 }
-
-//Get: User Recent Location
-const recentLocation = [
-  // {
-  //   id: 1,
-  //   name: 'Blk 223 Bus Stop',
-  //   distance: '300m away',
-  // },
-  // {
-  //   id: 2,
-  //   name: 'Blk 220 Garden',
-  //   distance: '200m away',
-  // },
-];
-
-//Get: User Favourite Location
-const favouriteLocation = [
-  // {
-  //   id: 1,
-  //   name: 'Blk 223 Bus Stop',
-  //   distance: '300m away',
-  // },
-  // {
-  //   id: 2,
-  //   name: 'Amk CC',
-  //   distance: '500m away',
-  // },
-];
-
-// Get: All Location
-// const allLocations = [
-//   {
-//     id: 1,
-//     name: 'Blk 444 Bus Stop',
-//   },
-//   {
-//     id: 2,
-//     name: 'Blk 220 Garden',
-//   },
-//   {
-//     id: 3,
-//     name: 'Blk 223 Bus Stop',
-//   },
-//   {
-//     id: 4,
-//     name: 'Amk CC',
-//   },
-// ];
 
 interface Location {
   id: number;
@@ -91,9 +55,10 @@ const CallScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [stations, setStations] = useState<Station[]>([]);
+  const [robot_requests, setRequests] = useState<Robot_Request[]>([]);
 
   // Get: All Station
-  const fetchStations = async (userId: number) => {
+  const fetchStations = async () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
@@ -108,11 +73,80 @@ const CallScreen: React.FC = () => {
       setIsLoading(false);
     }
   };
+  
+  // Get: Existing Request
+  const fetchRequests = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(
+        `http://10.0.2.2:5000/robot_request/user/7/status_not/0`,
+      );
+      if (response.status === 200) {
+        setRequests(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   // Handlers
   const callRobotHandler = () => {
     showToast('Calling Robot');
   };
+
+  // Update your handler to accept a Robot_Request
+const completeHandler = async (request: Robot_Request) => {
+  console.log("completeHandler called with request:", request); 
+  try {
+    setIsLoading(true);
+    const response = await axios.put(
+      `http://10.0.2.2:5000/robot_request/${request.request_id}`,
+      { 
+        request_status: 0
+      }
+    );
+    if (response.status === 200) {
+      showToast('Journey completed.');
+
+      // Remove the completed request from the state
+      setRequests(prevRobotRequests => 
+        prevRobotRequests.filter(req => req.request_id !== request.request_id)
+      );
+
+      // Call the robot/station API endpoint
+      const updateRobotStationResponse = await axios.put(
+        `http://10.0.2.2:5000/robot/${request.robot_id}/station/${request.destination_station}`
+      );
+      if(updateRobotStationResponse.status === 200){
+        showToast('Robot and station updated successfully.');
+        // You can update your state related to robot or station here, if necessary
+      } else {
+        showToast('Failed to update robot and station.');
+      }
+
+      // Call the update_slots API endpoint
+      const updateSlotsResponse = await axios.post(`http://10.0.2.2:5000/update_slots`);
+      if(updateSlotsResponse.status === 200){
+        showToast('Slots updated successfully.');
+        // You can update your state related to slots here, if necessary
+      } else {
+        showToast('Failed to update slots.');
+      }
+
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setIsLoading(false);
+  }
+}
+
+// Make sure to update your onPress call to pass the entire item:
+// onPress={() => completeHandler(item)}
+
 
   const toggleEditModal = () => {
     setShowEditModal(!showEditModal);
@@ -121,11 +155,7 @@ const CallScreen: React.FC = () => {
   const seacrhTextHandler = (text: string) => {
     setSearchText(text);
     setDropdownVisible(text !== '');
-    const filteredLocations = allLocations.filter(location =>
-      location.name.toLowerCase().includes(text.toLowerCase()),
-    );
-    setSearchResults(filteredLocations);
-  };
+   };
 
   const searchResultHandler = (item: Location) => {
     setSelectedLocation(item);
@@ -135,6 +165,7 @@ const CallScreen: React.FC = () => {
 
   useEffect(() => {
     fetchStations();
+    fetchRequests();
   }, []);
 
   return (
@@ -149,6 +180,7 @@ const CallScreen: React.FC = () => {
         <Header headerText={'Request Robot'} />
         {/* Main Content */}
         <View style={bodyContainer.container}>
+
           {showEditModal && <EditFavouritesModal onSave={toggleEditModal} />}
           {/* Search bar */}
           <TextInput
@@ -187,7 +219,37 @@ const CallScreen: React.FC = () => {
               />
             </View>
           )}
-          {/* Recent */}
+        
+          {/* Existing Booking */}
+          <View
+            style={{
+              ...styles.cardContainer,
+              backgroundColor: theme.colors.surface,
+            }}
+          >
+            
+            <View style={styles.headingRow}>
+              <View style={styles.headingTextContainer}>
+                <Text
+                  style={{
+                    ...styles.cardHeading,
+                    color: theme.colors.secondary,
+                  }}
+                >
+                  Current Request
+                </Text>
+              </View>
+              {/* <TouchableOpacity onPress={toggleEditModal}>
+                <Icon size={30} name="edit" color={theme.colors.secondary} />
+              </TouchableOpacity> */}
+            </View>
+            <View style={styles.border} />
+            <RequestCardRow
+              robot_request={robot_requests}
+              completeHandler={completeHandler}
+            />
+          </View>
+          {/* Nearby */}
           <View
             style={{
               ...styles.cardContainer,
@@ -197,7 +259,7 @@ const CallScreen: React.FC = () => {
             <Text
               style={{ ...styles.cardHeading, color: theme.colors.secondary }}
             >
-              All Robots
+              Nearby Station
             </Text>
             <View style={styles.border} />
             <LocationCardRow
@@ -205,34 +267,6 @@ const CallScreen: React.FC = () => {
               callRobotHandler={callRobotHandler}
             />
           </View>
-          {/* Favourite
-          <View
-            style={{
-              ...styles.cardContainer,
-              backgroundColor: theme.colors.surface,
-            }}
-          >
-            <View style={styles.headingRow}>
-              <View style={styles.headingTextContainer}>
-                <Text
-                  style={{
-                    ...styles.cardHeading,
-                    color: theme.colors.secondary,
-                  }}
-                >
-                  Favourite
-                </Text>
-              </View>
-              <TouchableOpacity onPress={toggleEditModal}>
-                <Icon size={30} name="edit" color={theme.colors.secondary} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.border} />
-            <LocationCardRow
-              location={favouriteLocation}
-              callRobotHandler={callRobotHandler}
-            />
-          </View> */}
         </View>
       </SafeAreaView>
     </>
