@@ -5,8 +5,8 @@ from credential import host,user,password,database
 from flask_jwt_extended import JWTManager
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://'+user+':@'+host+'/'+database
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://'+user+':@'+host+'/'+database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database
 db.init_app(app)
 
 # Configure JWT settings
