@@ -66,7 +66,7 @@ const HelpScreen: React.FC = () => {
               onPress={() => navigationHandler(1)}
             >
               <View style={styles.buttonContent}>
-                <Icon size={80} name="flag" color={theme.colors.secondary} />
+                <Icon size={60} name="flag" color={theme.colors.secondary} />
                 <Text
                   style={{
                     ...styles.buttonText,
@@ -86,7 +86,7 @@ const HelpScreen: React.FC = () => {
             >
               <View style={styles.buttonContent}>
                 <Icon
-                  size={80}
+                  size={60}
                   name="calendar-today"
                   color={theme.colors.secondary}
                 />
@@ -110,7 +110,7 @@ const HelpScreen: React.FC = () => {
               onPress={() => navigationHandler(3)}
             >
               <View style={styles.buttonContent}>
-                <Icon size={80} name="phone" color={theme.colors.secondary} />
+                <Icon size={60} name="phone" color={theme.colors.secondary} />
                 <Text
                   style={{
                     ...styles.buttonText,
@@ -130,7 +130,7 @@ const HelpScreen: React.FC = () => {
             >
               <View style={styles.buttonContent}>
                 <Icon
-                  size={80}
+                  size={60}
                   name="settings"
                   color={theme.colors.secondary}
                 />
@@ -158,9 +158,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   container: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-around',
-    height: 170,
+    height: 300,
   },
   button: {
     flex: 1,

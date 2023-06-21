@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  Modal,
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
@@ -14,9 +13,6 @@ import { useTheme } from 'react-native-paper';
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
-import MapView, { Marker } from 'react-native-maps';
-import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
-import { Platform, PermissionsAndroid } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -26,13 +22,6 @@ import ApptCardRow from '../components/ApptCardRow';
 type ScreenList = {
   LoginScreen: undefined;
 };
-
-interface CurrentLocation {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-}
 
 interface Appointment {
   appointment_id: number;
@@ -44,10 +33,6 @@ interface Appointment {
 
 const DashboardScreen: React.FC = () => {
   //States
-  const [mapContainer, setMapContainer] = useState(false);
-  const [currentLocation, setCurrentLocation] =
-    useState<CurrentLocation | null>(null);
-  const [showWaitingModal, setShowWaitingModal] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,54 +42,6 @@ const DashboardScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<ScreenList>>();
 
   //Handlers
-  //Get the user's current location
-  const getCurrentLocation = async () => {
-    try {
-      let granted = false;
-      if (Platform.OS === 'android') {
-        const permission = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'This app needs access to your location.',
-            buttonPositive: 'OK',
-            buttonNegative: 'Cancel',
-          },
-        );
-        granted = permission === PermissionsAndroid.RESULTS.GRANTED;
-      } else {
-        // iOS Permission request
-        Geolocation.requestAuthorization('whenInUse');
-        granted = true;
-      }
-
-      //If permission granted, get the current location
-      if (granted) {
-        Geolocation.getCurrentPosition(
-          handleLocationUpdate,
-          error => {
-            console.log(error);
-          },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
-        );
-      } else {
-        console.log('Location permission denied');
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  //Update the current location
-  const handleLocationUpdate = (position: GeoPosition) => {
-    const { latitude, longitude } = position.coords;
-    setCurrentLocation({
-      latitude,
-      longitude,
-      latitudeDelta: 0.04,
-      longitudeDelta: 0.04,
-    });
-  };
 
   //Logout Handler
   const handleLogout = async () => {
@@ -118,16 +55,6 @@ const DashboardScreen: React.FC = () => {
   //Call Robot Handler
   const callRobotHandler = () => {
     // Send request to backend to call robot
-    //Send Driver's current location
-
-    setMapContainer(true);
-    setShowWaitingModal(true);
-
-    // Start waiting timer
-    setTimeout(() => {
-      setShowWaitingModal(false);
-      setMapContainer(false);
-    }, 30000);
   };
 
   // Get User's Appointments
@@ -181,21 +108,7 @@ const DashboardScreen: React.FC = () => {
 
   //useEffect Hook
   useEffect(() => {
-    getCurrentLocation();
     getProfile();
-
-    //Watch the location for changes
-    const watchId = Geolocation.watchPosition(
-      handleLocationUpdate,
-      error => {
-        console.log(error);
-      },
-      { enableHighAccuracy: true, distanceFilter: 10 },
-    );
-
-    return () => {
-      Geolocation.clearWatch(watchId);
-    };
   }, []);
 
   useEffect(() => {
@@ -220,27 +133,6 @@ const DashboardScreen: React.FC = () => {
         <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.logoutBtn}>Logout</Text>
         </TouchableOpacity>
-
-        {/* Map Container */}
-        {mapContainer && (
-          <View style={styles.mapContainer}>
-            {currentLocation && (
-              <MapView
-                style={{ alignSelf: 'stretch', height: '100%' }}
-                region={currentLocation}
-              >
-                <Marker coordinate={currentLocation} title="Marker" />
-              </MapView>
-            )}
-          </View>
-        )}
-
-        {/* Waiting Modal */}
-        <Modal visible={showWaitingModal} transparent={true}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>Waiting for available robot...</Text>
-          </View>
-        </Modal>
 
         <ScrollView
           style={{
@@ -339,10 +231,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-  mapContainer: {
-    height: 300,
-    backgroundColor: 'red',
-  },
   headerText: {
     fontSize: 30,
     fontWeight: 'bold',
@@ -360,20 +248,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  modalContainer: {
-    position: 'absolute',
-    top: 60,
-    height: 300,
-    width: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.white,
-    textAlign: 'center',
-    marginTop: 140,
   },
   errorContainer: {
     borderRadius: 15,

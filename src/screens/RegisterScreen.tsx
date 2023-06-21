@@ -74,46 +74,60 @@ const RegisterScreen: React.FC = () => {
           </Text>
 
           {/* Inputs */}
-          <TextInput
-            style={{ ...styles.input, color: theme.colors.secondary }}
-            placeholder="Username"
-            value={username}
-            onChangeText={text => setUsername(text)}
-            placeholderTextColor={theme.colors.secondary}
-          />
-          <TextInput
-            style={{ ...styles.input, color: theme.colors.secondary }}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={text => setPassword(text)}
-            placeholderTextColor={theme.colors.secondary}
-          />
-          <TextInput
-            style={{ ...styles.input, color: theme.colors.secondary }}
-            placeholder="Address"
-            value={address}
-            onChangeText={text => setAddress(text)}
-            placeholderTextColor={theme.colors.secondary}
-          />
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Username</Text>
+            <TextInput
+              style={{ ...styles.input, color: theme.colors.secondary }}
+              placeholder="Enter Username..."
+              value={username}
+              onChangeText={text => setUsername(text)}
+              placeholderTextColor={theme.colors.secondary}
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={{ ...styles.input, color: theme.colors.secondary }}
+              placeholder="Enter Password..."
+              secureTextEntry
+              value={password}
+              onChangeText={text => setPassword(text)}
+              placeholderTextColor={theme.colors.secondary}
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Address</Text>
+            <TextInput
+              style={{ ...styles.input, color: theme.colors.secondary }}
+              placeholder="Enter Address..."
+              value={address}
+              onChangeText={text => setAddress(text)}
+              placeholderTextColor={theme.colors.secondary}
+            />
+          </View>
 
           {/* Options */}
-          <TouchableOpacity
-            style={{
-              ...styles.input,
-              backgroundColor: theme.colors.background,
-              justifyContent: 'center', // Align items vertically to center
-            }}
-            onPress={toggleDropdown}
-          >
-            <Text
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Role</Text>
+            <TouchableOpacity
               style={{
-                color: theme.colors.secondary,
+                ...styles.input,
+                backgroundColor: theme.colors.background,
+                justifyContent: 'center', // Align items vertically to center
               }}
+              onPress={toggleDropdown}
             >
-              {role}
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={{
+                  color: theme.colors.secondary,
+                  fontSize: 20,
+                }}
+              >
+                {role}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Dropdown */}
           <Modal visible={isDropdownOpen} transparent>
@@ -127,13 +141,17 @@ const RegisterScreen: React.FC = () => {
                   style={styles.dropdownOption}
                   onPress={() => handleOptionSelect('User')}
                 >
-                  <Text style={{ fontSize: 20 }}>User</Text>
+                  <Text style={{ fontSize: 20, color: theme.colors.secondary }}>
+                    User
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.dropdownOption}
                   onPress={() => handleOptionSelect('Driver')}
                 >
-                  <Text style={{ fontSize: 20 }}>Driver</Text>
+                  <Text style={{ fontSize: 20, color: theme.colors.secondary }}>
+                    Driver
+                  </Text>
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
@@ -149,11 +167,11 @@ const RegisterScreen: React.FC = () => {
             <Text
               style={{
                 color: theme.colors.secondary,
-                marginTop: 10,
-                fontSize: 20,
+                marginTop: 20,
+                fontSize: 24,
               }}
             >
-              Have an account? Login here
+              Have an account? Login
             </Text>
           </TouchableOpacity>
         </View>
@@ -171,23 +189,24 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    height: 50,
+    height: 60,
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
+    fontSize: 20,
   },
   button: {
     width: '100%',
     backgroundColor: colors.primary,
-    paddingVertical: 10,
+    paddingVertical: 20,
     paddingHorizontal: 20,
     borderRadius: 5,
     marginTop: 10,
   },
   buttonText: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -195,6 +214,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'left',
+    alignSelf: 'flex-start',
   },
   dropdownOverlay: {
     flex: 1,
@@ -211,6 +232,16 @@ const styles = StyleSheet.create({
   dropdownOption: {
     paddingVertical: 8,
     fontSize: 30,
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  label: {
+    color: colors.primary,
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginBottom: 5,
   },
 });
 
