@@ -1,19 +1,16 @@
-// TODO Fix green border with the appointments
-
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
   Text,
   SafeAreaView,
   TouchableOpacity,
-  Image,
   SectionList,
   RefreshControl,
   SectionListData,
 } from 'react-native';
 
-import { mainContainer, bodyContainer, colors } from '../styles/styles';
+import { mainContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -23,6 +20,8 @@ import {
   NavigationProp,
   useRoute,
   ParamListBase,
+  useFocusEffect,
+  useIsFocused,
 } from '@react-navigation/native';
 import { ActivityIndicator, useTheme } from 'react-native-paper';
 import axios from 'axios';
@@ -117,12 +116,28 @@ const AppointmentScreen: React.FC = () => {
     // Get appointments for the user
     AsyncStorage.getItem('userProfileID').then(ID => {
       if (ID != null) {
-        console.log(' ===== Parsed userID', ID, 'to appt page =====');
-        fetchAppointments(parseInt(ID));
-        setLoading(false);
+        // console.debug(' ===== Parsed userID', ID, 'to appt page =====');
+        // fetchAppointments(parseInt(ID));
+        // setLoading(false);
+        setUserID(ID); // To use outside this function
       }
     });
   }, []);
+
+  // Refresh sectionList
+  const isFocused = useIsFocused();
+  const [userID, setUserID] = useState<string>();
+  useEffect(() => {
+    setLoading(true); // Add loading circle initially
+    if (isFocused || userID) {
+      // console.log('refreshing sectionlist...');
+      userID ? fetchAppointments(parseInt(userID)) : null;
+      // : console.error('UserID is null');
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  }, [isFocused, userID]);
 
   //          ===== SECTION LIST =====
   // For refreshing and updating past appointments
