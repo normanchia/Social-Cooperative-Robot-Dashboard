@@ -4,29 +4,41 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from 'react-native-paper';
 import { colors } from '../styles/styles';
 
-interface Station {
-  station_id: number;
-  station_name: string;
-  station_location: string;
-  slot_available: number;
-  total_slot: number;
+interface Robot_Request {
+    user_id: number;
+    request_status: number;
+    request_id: number;
+    pickup_station_name: string;
+    destination_station_name: string;
+    pickup_station_id: number;
+    destination_station_id: number;
+    robot_id: number;
+  }
+
+interface RequestCardRowProps {
+  robot_request: Robot_Request[];
+  completeHandler: (request: Robot_Request) => void;
 }
 
-interface LocationCardRowProps {
-  location: Station[];
-  callRobotHandler: () => void;
+const statusMapping: { [key: number]: string } = {
+  0: 'Completed',
+  1: 'Ready for pickup',
+  2: 'In transit',
+  3: 'On the way',
+
 }
 
-const LocationCardRow: React.FC<LocationCardRowProps> = ({
-  location,
-  callRobotHandler,
+const RequestCardRow: React.FC<RequestCardRowProps> = ({
+    robot_request,
+    completeHandler,
 }) => {
   const theme = useTheme(); // use the theme hook
 
+  
   return (
     <>
-      {location.map(item => (
-        <View key={item.station_id} style={styles.cardRow}>
+      {robot_request && robot_request.map(item => (
+        <View key={item.request_id} style={styles.cardRow}>
           <Icon
             size={30}
             name="location-on"
@@ -35,14 +47,12 @@ const LocationCardRow: React.FC<LocationCardRowProps> = ({
           />
           <View style={styles.cardInfo}>
             <Text style={[styles.cardText, { color: theme.colors.secondary }]}>
-              {item.station_name}
+              {statusMapping[item.request_status]}
             </Text>
             <Text style={{ color: theme.colors.secondary }}>
-              {item.slot_available}/{item.total_slot} Robots available
+              {item.pickup_station_name} - {item.destination_station_name} 
             </Text>
-            <Text style={{ color: theme.colors.secondary }}>
-              {item.station_location} away
-            </Text>
+
           </View>
           <View>
             <TouchableOpacity
@@ -50,9 +60,11 @@ const LocationCardRow: React.FC<LocationCardRowProps> = ({
                 styles.cardBtn,
                 { backgroundColor: theme.colors.primary },
               ]}
-              onPress={callRobotHandler}
-            >
-              <Text style={styles.cardBtnText}>Call Robot</Text>
+              onPress={() => {
+                console.log("Calling completeHandler with item.request_id:", item.request_id);
+                completeHandler(item);
+              }}              >
+              <Text style={styles.cardBtnText}>Complete</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -97,4 +109,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LocationCardRow;
+export default RequestCardRow;
