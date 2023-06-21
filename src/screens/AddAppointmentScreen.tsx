@@ -68,10 +68,17 @@ const AddAppointmentScreen: React.FC = () => {
       'Saturday',
     ];
 
-    const weekday = weekdayList[today.getUTCDay()];
-    const day = today.getUTCDate();
-    const month = formatMMM(today.getUTCMonth());
-    const year = today.getUTCFullYear();
+    const timezoneOffset = today.getTimezoneOffset(); // Current offset in minutes
+    const durationInMinutes = 60; // It's getting GMT7, we live in GMT8 LOL
+    const newOffset = timezoneOffset + durationInMinutes;
+    const adjustedToday = new Date(today.getTime() + newOffset * 60 * 1000);
+    setDateTimeNOW(adjustedToday);
+    // setDate(adjustedToday); // set the dateTime as NOW
+
+    const weekday = weekdayList[adjustedToday.getUTCDay()];
+    const day = adjustedToday.getUTCDate();
+    const month = formatMMM(adjustedToday.getUTCMonth());
+    const year = adjustedToday.getUTCFullYear();
 
     // Setting the respective values
     setWeekday(weekday);
@@ -324,6 +331,7 @@ const AddAppointmentScreen: React.FC = () => {
   ]);
 
   //    For datetime picker     //
+  const [dateTimeNOW, setDateTimeNOW] = useState<Date>();
   const [dateTime, setDate] = useState(new Date());
   const [openDate, setOpenDate] = useState(false);
   const [openTime, setOpenTime] = useState(false);
@@ -595,14 +603,14 @@ const AddAppointmentScreen: React.FC = () => {
                 <DatePicker
                   modal
                   mode="date"
-                  minimumDate={dateTime}
+                  minimumDate={dateTimeNOW}
                   minuteInterval={5}
                   open={openDate}
                   date={dateTime}
                   onConfirm={date => {
                     setOpenDate(false);
                     setDate(date);
-                    //   const dateString = date.toDateString();   // For date - unused atm
+                    // const dateString = date.toDateString();   // For date - unused atm
                     const fullDateTime = date.toLocaleString('en-US', {
                       weekday: 'long',
                     });
