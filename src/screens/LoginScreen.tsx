@@ -87,24 +87,32 @@ const LoginScreen: React.FC = () => {
       >
         {/* Main Content */}
         <View style={styles.container}>
+          {/* Header */}
           <Text style={{ ...styles.headerText, color: theme.colors.secondary }}>
-            Login to your account
+            Login Now
           </Text>
-          <TextInput
-            style={{ ...styles.input, color: theme.colors.secondary }}
-            placeholder="Username"
-            value={username}
-            onChangeText={text => setUsername(text)}
-            placeholderTextColor={theme.colors.secondary}
-          />
-          <TextInput
-            style={{ ...styles.input, color: theme.colors.secondary }}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={text => setPassword(text)}
-            placeholderTextColor={theme.colors.secondary}
-          />
+          {/* Form */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Username</Text>
+            <TextInput
+              style={{ ...styles.input, color: theme.colors.secondary }}
+              placeholder="Enter Username..."
+              value={username}
+              onChangeText={text => setUsername(text)}
+              placeholderTextColor={theme.colors.secondary}
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={{ ...styles.input, color: theme.colors.secondary }}
+              placeholder="Enter Password..."
+              secureTextEntry
+              value={password}
+              onChangeText={text => setPassword(text)}
+              placeholderTextColor={theme.colors.secondary}
+            />
+          </View>
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
@@ -114,11 +122,11 @@ const LoginScreen: React.FC = () => {
             <Text
               style={{
                 color: theme.colors.secondary,
-                marginTop: 10,
-                fontSize: 20,
+                marginTop: 20,
+                fontSize: 24,
               }}
             >
-              Don't have an account? Register here
+              Don't have an account? Register
             </Text>
           </TouchableOpacity>
         </View>
@@ -134,25 +142,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 10,
   },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  label: {
+    color: colors.primary,
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginBottom: 5,
+  },
   input: {
     width: '100%',
-    height: 50,
+    height: 60,
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
+    fontSize: 20,
   },
   button: {
     width: '100%',
     backgroundColor: colors.primary,
-    paddingVertical: 10,
+    paddingVertical: 20,
     paddingHorizontal: 20,
     borderRadius: 5,
     marginTop: 10,
   },
   buttonText: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -160,6 +179,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'left',
+    alignSelf: 'flex-start',
   },
 });
 

@@ -36,6 +36,7 @@ const ApptCardRow: React.FC<ApptCardRowProps> = ({ appt }) => {
     const formattedHours = hours % 12 || 12;
     const formattedMinutes = minutes.toString().padStart(2, '0');
     const formattedTime = `${formattedHours}:${formattedMinutes} ${period}`;
+    // console.log('FORMATTED TIME APPTCARDROW:', formattedTime);
     return formattedTime;
   };
 

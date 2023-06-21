@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -17,45 +17,37 @@ type ScreenList = {
   LoginScreen: undefined;
 };
 
-//Get: List of Request
-const requestList = [
-  {
-    id: 1,
-    user: 'John Doe',
-    location: 'Tan Tock Seng Hospital-1',
-    time: '08:00 am',
-  },
-  {
-    id: 2,
-    user: 'Jane Doe',
-    location: 'Tan Tock Seng Hospital-2',
-    time: '09:00 am',
-  },
-  {
-    id: 3,
-    user: 'Alex Doe',
-    location: 'Tan Tock Seng Hospital-3',
-    time: '10:00 am',
-  },
-  {
-    id: 4,
-    user: 'Felix Doe',
-    location: 'Tan Tock Seng Hospital-4',
-    time: '11:00 am',
-  },
-];
-
 const DriverDashboardScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<ScreenList>>();
-
   const theme = useTheme();
-
-  const handleRequest = () => {};
+  const [robotLogs, setRobotLogs] = useState<string[]>([]);
 
   const handleLogout = () => {
     // Perform logout
     navigation.navigate('LoginScreen');
   };
+
+  useEffect(() => {
+    const generateRobotLogs = () => {
+      // Temp Data
+      const status = [
+        'picked up user at station',
+        'moving user to station',
+        'drop off user at station',
+      ];
+      const logs = [];
+      for (let i = 1; i <= 25; i++) {
+        const statusIndex = Math.floor(Math.random() * status.length);
+        const log = `Robot ${i}: ${status[statusIndex]} ${String.fromCharCode(
+          65 + i,
+        )}`;
+        logs.push(log);
+      }
+      setRobotLogs(logs);
+    };
+
+    generateRobotLogs();
+  }, []);
 
   return (
     <>
@@ -73,14 +65,18 @@ const DriverDashboardScreen: React.FC = () => {
         </TouchableOpacity>
         {/* Main Content */}
         <View style={bodyContainer.container}>
+          <Text style={{ ...styles.headerText, color: theme.colors.secondary }}>
+            Robot Status Log
+          </Text>
           <ScrollView>
-            <Text
-              style={{ ...styles.headerText, color: theme.colors.secondary }}
-            >
-              Request
-            </Text>
-            {/* Request Card */}
-            <RequestCardRow req={requestList} handleRequest={handleRequest} />
+            {robotLogs.map((log, index) => (
+              <Text
+                key={index}
+                style={{ ...styles.logText, color: theme.colors.secondary }}
+              >
+                {log}
+              </Text>
+            ))}
           </ScrollView>
         </View>
       </SafeAreaView>
@@ -88,103 +84,7 @@ const DriverDashboardScreen: React.FC = () => {
   );
 };
 
-interface Request {
-  id: number;
-  user: string;
-  location: string;
-  time: string;
-}
-
-interface RequestCardRowProps {
-  req: Request[];
-  handleRequest: () => void;
-}
-
-const RequestCardRow: React.FC<RequestCardRowProps> = ({
-  req,
-  handleRequest,
-}) => {
-  const theme = useTheme(); // use the theme hook
-
-  return (
-    <>
-      {req.map(item => (
-        <View
-          key={item.id}
-          style={{
-            ...styles.cardContainer,
-            backgroundColor: theme.colors.background,
-          }}
-        >
-          <Text style={{ ...styles.cardText, color: theme.colors.secondary }}>
-            Request #{item.id}
-          </Text>
-          <Text
-            style={{
-              ...styles.cardText,
-              fontWeight: 'normal',
-              color: theme.colors.secondary,
-            }}
-          >
-            Request Time: {item.time}
-          </Text>
-          <Text
-            style={{
-              ...styles.cardText,
-              fontWeight: 'normal',
-              color: theme.colors.secondary,
-            }}
-          >
-            Location: {item.location}
-          </Text>
-          <Text
-            style={{
-              ...styles.cardText,
-              fontWeight: 'normal',
-              color: theme.colors.secondary,
-            }}
-          >
-            User: {item.user}
-          </Text>
-          <TouchableOpacity
-            style={[styles.cardBtn, { backgroundColor: theme.colors.primary }]}
-            onPress={handleRequest}
-          >
-            <Text style={styles.cardBtnText}>Accept Request</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-    </>
-  );
-};
-
 const styles = StyleSheet.create({
-  cardContainer: {
-    borderRadius: 15,
-    backgroundColor: colors.white,
-    elevation: 5,
-    padding: 10,
-    marginBottom: 20,
-    borderLeftWidth: 5,
-    borderLeftColor: colors.primary,
-  },
-  cardText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 5,
-  },
-  cardBtn: {
-    marginTop: 10,
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    padding: 10,
-    alignItems: 'center',
-  },
-  cardBtnText: {
-    color: colors.white,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
   headerText: {
     fontSize: 30,
     fontWeight: 'bold',
@@ -201,6 +101,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  logText: {
+    fontSize: 16,
+    marginBottom: 10,
   },
 });
 
