@@ -18,92 +18,95 @@ const AccordionItem1: React.FC<{
 }> = memo(({ expanded, toggleExpanded }) => {
   const theme = useTheme();
   return (
-    <List.Accordion
-      title={
-        <Text
-          style={[
-            styles.accordionTitle,
-            expanded && styles.expandedAccordionTitle,
-          ]}
-        >
-          How to add a new appointment
-        </Text>}
-      expanded={expanded}
-      onPress={toggleExpanded}
-      right={(props) =>
-        expanded ? (
-          <Icon name="arrow-drop-up" size={40} color="#0000FF" {...props} />
-        ) : (
-          <Icon name="arrow-drop-down" size={40} color="black" {...props} />
-        )
-      }
-    >
-      {expanded && (
+    <View style={styles.accordionWrapper}>
+      <List.Accordion
+        title={
+          <Text
+            style={[
+              styles.accordionTitle,
+              expanded && styles.expandedAccordionTitle,
+            ]}
+          >
+            How to add a new appointment
+          </Text>}
+        expanded={expanded}
+        onPress={toggleExpanded}
+        right={(props) =>
+          expanded ? (
+            <Icon name="arrow-drop-up" size={40} color="#0000FF" {...props} />
+          ) : (
+            <Icon name="arrow-drop-down" size={40} color="black" {...props} />
+          )
+        }
+        style={styles.listAccordion}
+      >
+        {expanded && (
 
-        <ScrollView style={styles.contentContainer}>
-          <List.Item
-            title="Step 1" titleStyle={{...styles.accordionContentTitle, color: theme.colors.secondary }}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
-              On the appointment page, click on the "Add new Appt" button.
-            </Text>}
-          />
-          <View style={styles.imageContainer}>
-            <Image
-              source={require('/Users/Shumin/Documents/GitHub/ITP3111/src/assets/userguide/go_add_appt.png')}
-              style={styles.expandedImage}
+          <ScrollView style={styles.contentContainer}>
+            <List.Item
+              title="Step 1" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
+              description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
+                On the appointment page, click on the "Add new Appt" button.
+              </Text>}
             />
-          </View>
-          <List.Item
-            title="Step 2" titleStyle={{...styles.accordionContentTitle, color: theme.colors.secondary }}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
-              Click on the first box shown below to enter the name of your appointment.
-            </Text>}
-          />
-          <List.Item
-            title="Step 3" titleStyle={{...styles.accordionContentTitle, color: theme.colors.secondary }}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
-              Next, click on the second box to choose the location of your appointment.
-            </Text>}
-          />
-          <View style={styles.imageContainer}>
-            <Image
-              source={require('/Users/Shumin/Documents/GitHub/ITP3111/src/assets/userguide/go_add_appt1.png')}
-              style={styles.expandedImage}
+            <View style={styles.imageContainer}>
+              <Image
+                source={require('../../assets/userguide/go_add_appt.png')}
+                style={styles.expandedImage}
+              />
+            </View>
+            <List.Item
+              title="Step 2" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
+              description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
+                Click on the first box shown below to enter the name of your appointment.
+              </Text>}
             />
-          </View>
-          <List.Item
-            title="Step 4" titleStyle={{...styles.accordionContentTitle, color: theme.colors.secondary }}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
-              Click on "Add Date" to choose the date and "Add Time" to choose the time.
-            </Text>}
-          />
-          <View style={styles.imageContainer}>
-            <Image
-              source={require('/Users/Shumin/Documents/GitHub/ITP3111/src/assets/userguide/go_add_appt2.png')}
-              style={styles.expandedImage}
+            <List.Item
+              title="Step 3" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
+              description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
+                Next, click on the second box to choose the location of your appointment.
+              </Text>}
             />
-          </View>
-          <List.Item
-            title="Step 5 (optional)" titleStyle={{...styles.accordionContentTitle, color: theme.colors.secondary }}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
-              Click on the box below to add a note on this appointment.
-            </Text>}
-          />
-          <View style={styles.imageContainer}>
-            <Image
-              source={require('/Users/Shumin/Documents/GitHub/ITP3111/src/assets/userguide/go_add_appt3.png')}
-              style={styles.expandedImage}
+            <View style={styles.imageContainer}>
+              <Image
+                source={require('../../assets/userguide/go_add_appt1.png')}
+                style={styles.expandedImage}
+              />
+            </View>
+            <List.Item
+              title="Step 4" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
+              description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
+                Click on "Add Date" to choose the date and "Add Time" to choose the time.
+              </Text>}
             />
-          </View>
-          <List.Item
-            title="Step 6" titleStyle={{...styles.accordionContentTitle, color: theme.colors.secondary }}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
-              Click on the "Add appointment!" button and you are done!.
-            </Text>}
-          />
-        </ScrollView>
-      )}
-    </List.Accordion>
+            <View style={styles.imageContainer}>
+              <Image
+                source={require('../../assets/userguide/go_add_appt2.png')}
+                style={styles.expandedImage}
+              />
+            </View>
+            <List.Item
+              title="Step 5 (optional)" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
+              description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
+                Click on the box below to add a note on this appointment.
+              </Text>}
+            />
+            <View style={styles.imageContainer}>
+              <Image
+                source={require('../../assets/userguide/go_add_appt3.png')}
+                style={styles.expandedImage}
+              />
+            </View>
+            <List.Item
+              title="Step 6" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
+              description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
+                Click on the "Add appointment!" button and you are done!.
+              </Text>}
+            />
+          </ScrollView>
+        )}
+      </List.Accordion>
+    </View>
   );
 });
 
@@ -113,6 +116,7 @@ const AccordionItem2: React.FC<{
 }> = memo(({ expanded, toggleExpanded }) => {
   const theme = useTheme();
   return (
+    <View style={styles.accordionWrapper}>
     <List.Accordion
       title={
         <Text
@@ -132,66 +136,68 @@ const AccordionItem2: React.FC<{
           <Icon name="arrow-drop-down" size={40} color="black" {...props} />
         )
       }
+      style={styles.listAccordion}
     >
       {expanded && (
 
         <ScrollView style={styles.contentContainer}>
           <List.Item
-            title="Step 1" titleStyle={{...styles.accordionContentTitle, color: theme.colors.secondary }}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
+            title="Step 1" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
+            description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
               Click on the appointment you wish to change.
             </Text>}
           />
           <View style={styles.imageContainer}>
             <Image
-              source={require('/Users/Shumin/Documents/GitHub/ITP3111/src/assets/userguide/change_appt.png')}
+              source={require('../../assets/userguide/change_appt.png')}
               style={styles.expandedImage}
             />
           </View>
           <List.Item
             title="" titleStyle={styles.accordionContentTitle}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
+            description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
               A pop up will appear on your screen as shown below.
             </Text>}
           />
           <View style={styles.imageContainer}>
             <Image
-              source={require('/Users/Shumin/Documents/GitHub/ITP3111/src/assets/userguide/change_appt1.png')}
+              source={require('../../assets/userguide/change_appt1.png')}
               style={styles.expandedImage}
             />
           </View>
           <List.Item
-            title="Step 2" titleStyle={{...styles.accordionContentTitle, color: theme.colors.secondary }}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
+            title="Step 2" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
+            description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
               Click on “Edit appointment” to proceed and make the changes needed.
             </Text>}
           />
           <View style={styles.imageContainer}>
             <Image
-              source={require('/Users/Shumin/Documents/GitHub/ITP3111/src/assets/userguide/change_appt2.png')}
+              source={require('../../assets/userguide/change_appt2.png')}
               style={styles.expandedImage}
             />
           </View>
           <List.Item
-            title="Step 3" titleStyle={{...styles.accordionContentTitle, color: theme.colors.secondary }}
-            description={<Text style={{...styles.descriptionText , color: theme.colors.secondary }}>
+            title="Step 3" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
+            description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
               Click on "Update" to apply the changes.
             </Text>}
           />
           <View style={styles.customListItem}>
-            <Text style={{...styles.descriptionText , color: theme.colors.secondary }} >
+            <Text style={{ ...styles.descriptionText, color: theme.colors.secondary }} >
               Upon successful update, a message will be shown at the bottom of the screen for a few seconds.
             </Text>
           </View>
           <View style={styles.imageContainer}>
             <Image
-              source={require('/Users/Shumin/Documents/GitHub/ITP3111/src/assets/userguide/change_appt3.png')}
+              source={require('../../assets/userguide/change_appt3.png')}
               style={styles.expandedImage}
             />
           </View>
         </ScrollView>
       )}
     </List.Accordion>
+    </View>
   );
 });
 
@@ -231,6 +237,22 @@ const styles = StyleSheet.create({
   accordionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  accordionWrapper: {
+    shadowColor: '#000',
+    shadowOpacity: 1,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowRadius: 2,
+    elevation: 8,
+    backgroundColor: '#FFF', // Add background color if needed
+    borderRadius: 8, // Add border radius if needed
+    marginVertical: 5, // Add margin if needed
+  },
+  listAccordion: {
+    backgroundColor: 'transparent', // Ensure the List.Accordion background is transparent
   },
   accordionContentTitle: {
     marginTop: -10,
