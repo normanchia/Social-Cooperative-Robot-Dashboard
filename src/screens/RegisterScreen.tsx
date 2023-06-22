@@ -136,7 +136,12 @@ const RegisterScreen: React.FC = () => {
               activeOpacity={1}
               onPress={toggleDropdown}
             >
-              <View style={styles.dropdownContainer}>
+              <View
+                style={{
+                  ...styles.dropdownContainer,
+                  backgroundColor: theme.colors.surface,
+                }}
+              >
                 <TouchableOpacity
                   style={styles.dropdownOption}
                   onPress={() => handleOptionSelect('User')}
