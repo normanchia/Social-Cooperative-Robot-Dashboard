@@ -16,7 +16,7 @@ import BottomNav from '../components/BottomNav';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { isSameDay, parse } from 'date-fns';
+import { format, isSameDay, parse, parseISO, parseJSON } from 'date-fns';
 import ApptCardRow from '../components/ApptCardRow';
 
 type ScreenList = {
@@ -65,18 +65,33 @@ const DashboardScreen: React.FC = () => {
         `http://10.0.2.2:5000/appointment/user/${userId}`,
       );
       if (response.status === 200) {
-        const today = new Date();
-        console.log(today);
         const filteredAppointments = response.data.filter(
-          (appointment: Appointment) =>
-            isSameDay(
-              parse(
-                appointment.appointment_date,
-                "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
-                new Date(),
-              ),
-              today,
-            ),
+          (appointment: Appointment) => {
+            const apptDateRaw = new Date(appointment.appointment_date);
+            const todayDateRaw = new Date();
+
+            // Set both to be same GMT time cause Date() doesnt return the correct timezone
+            apptDateRaw.setUTCHours(apptDateRaw.getUTCHours() + 8);
+            todayDateRaw.setUTCHours(todayDateRaw.getUTCHours() + 8);
+
+            // Force comparison because couldn't get isSameDay to work :P
+            const appointmentDateFormatted = apptDateRaw
+              .toISOString()
+              .split('T')[0];
+            const todayDateFormatted = todayDateRaw.toISOString().split('T')[0];
+            return appointmentDateFormatted === todayDateFormatted; // T/F
+            // isSameDay(
+            //   parse(
+            //     appointment.appointment_date,
+            //     "EEE dd MMM yyyy HH:mm:ss 'GMT'",
+            //     new Date(),
+            //   ),
+            //   today),
+            // );
+            console.log('\nToday', appointmentDateFormatted);
+            console.log('ApptDate', todayDateFormatted);
+            console.log(appointmentDateFormatted === todayDateFormatted, '\n');
+          },
         );
         setAppointments(filteredAppointments);
       }

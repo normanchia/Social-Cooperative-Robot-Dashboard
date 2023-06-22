@@ -30,13 +30,13 @@ const ApptCardRow: React.FC<ApptCardRowProps> = ({ appt }) => {
   // Handlers
   const convertTime = (time: number) => {
     const appointmentTime = new Date(time * 1000);
+    appointmentTime.setUTCHours(appointmentTime.getUTCHours() + 8); // change to GMT +8
     const hours = appointmentTime.getHours();
     const minutes = appointmentTime.getMinutes();
     const period = hours >= 12 ? 'pm' : 'am';
     const formattedHours = hours % 12 || 12;
     const formattedMinutes = minutes.toString().padStart(2, '0');
     const formattedTime = `${formattedHours}:${formattedMinutes} ${period}`;
-    // console.log('FORMATTED TIME APPTCARDROW:', formattedTime);
     return formattedTime;
   };
 
