@@ -36,8 +36,23 @@ def update_robot_station(robot_id, station_id):
     if robot and station:
         # Update the robot's station
         robot.station_location = station.station_id
+        robot.robot_status = 1
         db.session.commit()
         return jsonify({'message': f'Robot {robot_id} now stationed at {station.station_name}.'})
     else:
         return jsonify({'message': 'Robot or station not found!'}), 404
+
+
+@robot_blueprint.route('/robot/station/<int:station_id>/status/<int:status>', methods=['GET'])
+def get_robot_by_station_and_status(station_id, status):
+    # Query the Robot table
+    robots = Robot.query.filter_by(station_location=station_id, robot_status=status).all()
+
+    if robots:
+        return jsonify([{'robot_id': r.robot_id,
+                         'robot_name': r.robot_name,
+                         'robot_status': r.robot_status,
+                         'station_location': r.station_location} for r in robots])
+    else:
+        return jsonify({'message': 'No robots found at this station with the given status!'}), 404
 

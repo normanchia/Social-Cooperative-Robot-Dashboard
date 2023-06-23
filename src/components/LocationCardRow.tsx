@@ -14,7 +14,7 @@ interface Station {
 
 interface LocationCardRowProps {
   location: Station[];
-  callRobotHandler: () => void;
+  callRobotHandler: (station: Station) => void; // callRobotHandler now expects a Station as parameter
 }
 
 const LocationCardRow: React.FC<LocationCardRowProps> = ({
@@ -38,7 +38,7 @@ const LocationCardRow: React.FC<LocationCardRowProps> = ({
               {item.station_name}
             </Text>
             <Text style={{ color: theme.colors.secondary }}>
-              {item.slot_available}/{item.total_slot} Robots available
+              {item.total_slot-item.slot_available}/{item.total_slot} Robots available
             </Text>
             <Text style={{ color: theme.colors.secondary }}>
               {item.station_location} away
@@ -50,7 +50,7 @@ const LocationCardRow: React.FC<LocationCardRowProps> = ({
                 styles.cardBtn,
                 { backgroundColor: theme.colors.primary },
               ]}
-              onPress={callRobotHandler}
+              onPress={() => callRobotHandler(item)} // pass the current station to callRobotHandler
             >
               <Text style={styles.cardBtnText}>Call Robot</Text>
             </TouchableOpacity>

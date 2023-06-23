@@ -61,7 +61,6 @@ const RequestCardRow: React.FC<RequestCardRowProps> = ({
                 { backgroundColor: theme.colors.primary },
               ]}
               onPress={() => {
-                console.log("Calling completeHandler with item.request_id:", item.request_id);
                 completeHandler(item);
               }}              >
               <Text style={styles.cardBtnText}>Complete</Text>

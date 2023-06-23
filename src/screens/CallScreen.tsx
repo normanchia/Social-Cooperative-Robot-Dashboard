@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TextInput,
   FlatList,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { showToast } from '../util/action';
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
@@ -15,6 +16,7 @@ import LocationCardRow from '../components/LocationCardRow';
 import RequestCardRow from '../components/RequestCardRow';
 import { useTheme } from 'react-native-paper';
 import axios from 'axios';
+import AddRequestModal from '../components/AddRequestModal';
 
 interface Robot_Request {
   user_id: number;
@@ -39,52 +41,47 @@ const CallScreen: React.FC = () => {
   // States
   const theme = useTheme(); // use the theme hook
   const [isLoading, setIsLoading] = useState(false);
+  const [addRequestModal, toggleRequestModal] = useState(false);
 
   const [stations, setStations] = useState<Station[]>([]);
   const [robot_requests, setRequests] = useState<Robot_Request[]>([]);
 
+  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+
   // Get: All Station
   const fetchStations = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get(
-        `http://10.0.2.2:5000/robotstations`,
-      );
-      if (response.status === 200) {
-        setStations(response.data);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+    const response = await axios.get(
+      `http://10.0.2.2:5000/robotstations`,
+    );
+    if (response.status === 200) {
+      setStations(response.data);
     }
   };
   
   // Get: Existing Request
   const fetchRequests = async () => {
+    const response = await axios.get(
+      `http://10.0.2.2:5000/robot_request/user/7/status_not/0`,
+    );
+    if (response.status === 200) {
+      setRequests(response.data);
+    }
+  };
+
+  const fetchAllData = useCallback(async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const response = await axios.get(
-        `http://10.0.2.2:5000/robot_request/user/7/status_not/0`,
-      );
-      if (response.status === 200) {
-        setRequests(response.data);
-      }
+      await Promise.all([fetchStations(), fetchRequests()]);
     } catch (error) {
       console.log(error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Handlers
-  const callRobotHandler = () => {
-    showToast('Calling Robot');
-  };
+  }, []);
 
   // Update your handler to accept a Robot_Request
-const completeHandler = async (request: Robot_Request) => {
-  console.log("completeHandler called with request:", request); 
+  const completeHandler = useCallback(async (request: Robot_Request) => {
+    console.log("completeHandler called with request:", request); 
   try {
     setIsLoading(true);
     const response = await axios.put(
@@ -94,8 +91,7 @@ const completeHandler = async (request: Robot_Request) => {
       }
     );
     if (response.status === 200) {
-      showToast('Journey completed.');
-
+      console.log('Journey completed.');
       // Remove the completed request from the state
       setRequests(prevRobotRequests => 
         prevRobotRequests.filter(req => req.request_id !== request.request_id)
@@ -106,20 +102,19 @@ const completeHandler = async (request: Robot_Request) => {
         `http://10.0.2.2:5000/robot/${request.robot_id}/station/${request.destination_station_id}`
       );
       if(updateRobotStationResponse.status === 200){
-        showToast('Robot and station updated successfully.');
+        console.log('Robot and station updated successfully.');
         // You can update your state related to robot or station here, if necessary
         fetchStations();
       } else {
-        showToast('Failed to update robot and station.');
+        console.log('Failed to update robot and station.');
       }
 
       // Call the update_slots API endpoint
       const updateSlotsResponse = await axios.put(`http://10.0.2.2:5000/update_slots`);
       if(updateSlotsResponse.status === 200){
-        showToast('Slots updated successfully.');
-        // You can update your state related to slots here, if necessary
+        console.log('Slots updated successfully.');
       } else {
-        showToast('Failed to update slots.');
+        console.log('Failed to update slots.');
       }
 
     }
@@ -128,13 +123,30 @@ const completeHandler = async (request: Robot_Request) => {
   } finally {
     setIsLoading(false);
   }
-}
+}, []);
 
   useEffect(() => {
-    fetchStations();
-    fetchRequests();
-  }, []);
+    fetchAllData();
+  }, [fetchAllData]);
 
+  const toggleModal = () => {
+    toggleRequestModal(!addRequestModal);
+    if (addRequestModal) {
+      setSelectedStation(null);
+    }
+  };
+  
+  const callRobotHandler = (station: Station) => {
+    setSelectedStation(station);
+    toggleModal();
+  };
+
+  const createRobotRequest = async (destination: Station) => {
+    if (!selectedStation) return;
+    console.log("here")
+    // Make API request to create a new robot request using selectedStation and destination
+    // Update state or refetch data if necessary
+  };
   return (
     <>
       <SafeAreaView
@@ -147,8 +159,16 @@ const completeHandler = async (request: Robot_Request) => {
         <Header headerText={'Request Robot'} />
         {/* Main Content */}
         <View style={bodyContainer.container}>
-        
-          {/* Existing Booking */}
+        {addRequestModal && (
+        <AddRequestModal
+          visible={addRequestModal}
+          stations={stations}
+          selectedStation={selectedStation!}
+          onSave={createRobotRequest}
+          onClose={toggleModal}
+        />
+      )}         
+       {/* Existing Booking */}
           <View
             style={{
               ...styles.cardContainer,

@@ -1,18 +1,30 @@
 from flask import Blueprint, jsonify, request
-from models import Robot_Request, db
+from models import Robot_Request, db,Robot
 from datetime import datetime
 
 robot_request_blueprint = Blueprint('robot_request', __name__)
 
+
 @robot_request_blueprint.route('/robot_request', methods=['POST'])
 def create_robot_request():
     data = request.get_json()
-    new_request = Robot_Request(request_status=data['request_status'], user_id=data['user_id'],
-                               robot_id=data['robot_id'], pickup_station=data['pickup_station'],
-                               destination_station=data['destination_station'], request_time=datetime.utcnow())
-    db.session.add(new_request)
-    db.session.commit()
-    return jsonify({'message': 'New robot request created!'})
+
+    # Find the robot by robot_id
+    robot = Robot.query.get(data['robot_id'])
+    if robot:
+        # Update the robot status to 0
+        robot.robot_status = 0
+        db.session.commit()
+
+        new_request = Robot_Request(request_status=data['request_status'], user_id=data['user_id'],
+                                    robot_id=data['robot_id'], pickup_station=data['pickup_station'],
+                                    destination_station=data['destination_station'], request_time=datetime.utcnow())
+        db.session.add(new_request)
+        db.session.commit()
+        return jsonify({'message': 'New robot request created and robot status set to 0!'})
+    else:
+        return jsonify({'message': 'Robot not found!'}), 404
+
 
 @robot_request_blueprint.route('/robot_request/<int:request_id>', methods=['GET'])
 def get_robot_request(request_id):
