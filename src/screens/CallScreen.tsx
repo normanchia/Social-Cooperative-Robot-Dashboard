@@ -35,15 +35,8 @@ interface Station {
   total_slot: number;
 }
 
-interface Location {
-  id: number;
-  name: string;
-}
-
-
 const CallScreen: React.FC = () => {
   // States
-  const [showEditModal, setShowEditModal] = useState(false);
   const theme = useTheme(); // use the theme hook
   const [isLoading, setIsLoading] = useState(false);
 
