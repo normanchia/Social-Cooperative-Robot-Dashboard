@@ -8,11 +8,9 @@ import {
   TextInput,
   FlatList,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { showToast } from '../util/action';
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
-import EditFavouritesModal from '../components/EditFavoritesModal';
 import LocationCardRow from '../components/LocationCardRow';
 import RequestCardRow from '../components/RequestCardRow';
 import { useTheme } from 'react-native-paper';
@@ -46,12 +44,6 @@ interface Location {
 const CallScreen: React.FC = () => {
   // States
   const [showEditModal, setShowEditModal] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [searchResults, setSearchResults] = useState<Location[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null,
-  );
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const theme = useTheme(); // use the theme hook
   const [isLoading, setIsLoading] = useState(false);
 
@@ -91,7 +83,6 @@ const CallScreen: React.FC = () => {
       setIsLoading(false);
     }
   };
-
 
   // Handlers
   const callRobotHandler = () => {
@@ -146,25 +137,6 @@ const completeHandler = async (request: Robot_Request) => {
   }
 }
 
-// Make sure to update your onPress call to pass the entire item:
-// onPress={() => completeHandler(item)}
-
-
-  const toggleEditModal = () => {
-    setShowEditModal(!showEditModal);
-  };
-
-  const seacrhTextHandler = (text: string) => {
-    setSearchText(text);
-    setDropdownVisible(text !== '');
-   };
-
-  const searchResultHandler = (item: Location) => {
-    setSelectedLocation(item);
-    setSearchText(item.name);
-    setDropdownVisible(false);
-  };
-
   useEffect(() => {
     fetchStations();
     fetchRequests();
@@ -182,45 +154,6 @@ const completeHandler = async (request: Robot_Request) => {
         <Header headerText={'Request Robot'} />
         {/* Main Content */}
         <View style={bodyContainer.container}>
-
-          {showEditModal && <EditFavouritesModal onSave={toggleEditModal} />}
-          {/* Search bar */}
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Enter Destination"
-            value={searchText}
-            onChangeText={seacrhTextHandler}
-            placeholderTextColor={theme.colors.secondary}
-          />
-          {/* Search Results */}
-          {dropdownVisible && (
-            <View
-              style={{
-                ...styles.dropdownContainer,
-                backgroundColor: theme.colors.surface,
-              }}
-            >
-              <FlatList
-                data={searchResults}
-                keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.dropdownItem}
-                    onPress={() => searchResultHandler(item)}
-                  >
-                    <Text
-                      style={{
-                        ...styles.dropdownText,
-                        color: theme.colors.secondary,
-                      }}
-                    >
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          )}
         
           {/* Existing Booking */}
           <View
@@ -241,9 +174,6 @@ const completeHandler = async (request: Robot_Request) => {
                   Current Request
                 </Text>
               </View>
-              {/* <TouchableOpacity onPress={toggleEditModal}>
-                <Icon size={30} name="edit" color={theme.colors.secondary} />
-              </TouchableOpacity> */}
             </View>
             <View style={styles.border} />
             <RequestCardRow
