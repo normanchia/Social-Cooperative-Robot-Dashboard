@@ -1,5 +1,5 @@
 host = 'localhost'
 user = 'root'
-password = ''
+password = 'Min13914'
 # password = 'root'
 database = 'itp_team10_se'
