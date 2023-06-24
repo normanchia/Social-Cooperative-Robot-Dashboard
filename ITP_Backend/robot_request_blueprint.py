@@ -93,3 +93,21 @@ def delete_robot_request(request_id):
         return jsonify({'message': 'Robot request deleted!'})
     else:
         return jsonify({'message': 'Robot request not found!'}), 404
+
+#Get all robot requests by destination station id and request status = 0
+@robot_request_blueprint.route('/robot_request/station/<int:destination_station_id>/status/<int:request_status>', methods=['GET'])
+def get_robot_requests_by_destination_station(destination_station_id, request_status):
+    requests = Robot_Request.query.filter_by(destination_station=destination_station_id, request_status=request_status).all()
+    if requests:
+        return jsonify([{'request_id': r.request_id,
+                         'request_status': r.request_status,
+                         'user_id': r.user_id,
+                         'robot_id': r.robot_id,
+                         'pickup_station_id': r.pickup_station,
+                         'pickup_station_name': r.pickup_station_rel.station_name,
+                         'destination_station_id': r.destination_station,
+                         'destination_station_name': r.destination_station_rel.station_name,
+                         'request_time': r.request_time.strftime('%Y-%m-%d %H:%M:%S'),
+                         'completion_time': r.completion_time.strftime('%Y-%m-%d %H:%M:%S') if r.completion_time else None} for r in requests])
+    else:
+        return jsonify({'message': 'No requests found for this destination station with given status!'}), 404
