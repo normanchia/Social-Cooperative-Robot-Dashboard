@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,12 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import { mainContainer, bodyContainer } from '../styles/styles';
+import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
 import { useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { StyleSheet } from 'react-native';
+import { ThemeContext } from '../../ThemeContext';
 
 const ICON_SIZE = 60;
 
@@ -20,48 +21,49 @@ const settingsOptions = [
     text: 'Account Information',
     iconName: 'account-circle',
     color: '#6495ed',
-    textColor: '#000',
   },
   {
     text: 'Preferences',
     iconName: 'tune',
     color: '#3cb371',
-    textColor: '#000',
   },
   {
     text: 'Toggle Dark Mode',
     iconName: 'brightness-6',
     color: '#9c9c9c',
-    textColor: '#000',
   },
   {
     text: 'Notifications',
     iconName: 'notifications',
     color: '#800080',
-    textColor: '#000',
   },
   {
     text: 'Logout',
     iconName: 'exit-to-app',
     color: '#ff7f7f',
-    textColor: '#000',
   },
 ];
 
 const SettingItem = ({ item, toggleSwitch, isDarkMode }) => {
   const theme = useTheme();
+  const textColor = theme.colors.secondary;
+
   const buttonStyle = {
     ...styles.button,
     backgroundColor: theme.colors.surface,
   };
-  const textStyle = { ...styles.text, color: item.textColor };
+
+  const textStyle = {
+    ...styles.text,
+    color: textColor,
+  };
 
   return (
     <TouchableOpacity
       style={buttonStyle}
       onPress={item.text === 'Toggle Dark Mode' ? toggleSwitch : undefined}
     >
-      <Icon name={item.iconName} size={ICON_SIZE} color={item.textColor} />
+      <Icon name={item.iconName} size={ICON_SIZE} color={textColor} />
       <Text style={textStyle}>
         {item.text === 'Toggle Dark Mode'
           ? `Toggle ${isDarkMode ? 'Light' : 'Dark'} Mode`
@@ -73,11 +75,12 @@ const SettingItem = ({ item, toggleSwitch, isDarkMode }) => {
 
 const SettingsScreen: React.FC = () => {
   const theme = useTheme();
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { colorScheme, setTheme } = React.useContext(ThemeContext);
+  const isDarkMode = colorScheme === 'dark';
 
   const toggleSwitch = useCallback(
-    () => setIsDarkMode(previousState => !previousState),
-    [],
+    () => setTheme(isDarkMode ? 'light' : 'dark'),
+    [isDarkMode],
   );
 
   const renderItem = useCallback(
@@ -135,6 +138,7 @@ const styles = StyleSheet.create({
     elevation: 5, // for Android
   },
   text: {
+    color: colors.black,
     marginTop: 10,
     fontSize: 24,
     fontWeight: 'bold',
