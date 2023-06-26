@@ -8,8 +8,8 @@ CREATE TABLE robot (
 
 INSERT INTO Robot (robot_name, robot_status, station_location)
 VALUES
-('Robot1', 0, 1),
-('Robot2', 0, 3),
-('Robot3', 0, 1),
+('Robot1', 1, 1),
+('Robot2', 1, 3),
+('Robot3', 1, 1),
 ('Robot4', 1, 2),
 ('Robot5', 1, 4);
