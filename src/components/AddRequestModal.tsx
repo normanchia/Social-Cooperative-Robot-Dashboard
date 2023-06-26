@@ -1,19 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   Modal,
-  Button,
-  SafeAreaView,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  FlatList,
   Alert,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { colors } from '../styles/styles';
 import axios from 'axios';
+import { useTheme } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Station {
   station_id: number;
@@ -31,6 +29,9 @@ interface AddRequestModalProps {
   selectedStation: Station;
 }
 
+// get window's width and height
+const { width, height } = Dimensions.get('window');
+
 const AddRequestModal: React.FC<AddRequestModalProps> = ({
   visible,
   onClose,
@@ -38,7 +39,22 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   stations,
   selectedStation,
 }) => {
-  const [selectedDestinationId, setSelectedDestinationId] = useState<number>();
+  const theme = useTheme();
+  const { background, secondary } = theme.colors;
+  const [userID, setUserID] = useState<string>();
+  const [selectedDestinationId, setSelectedDestinationId] = useState<number>(stations[0].station_id);
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const userId = await AsyncStorage.getItem('userProfileID');
+      if (userId) {
+        setUserID(userId);
+      }
+    };
+
+    getUserId();
+  }, []);
+
   const handleSave = async () => {
     if (selectedDestinationId) {
       const selectedDestination = stations.find(station => station.station_id === selectedDestinationId);
@@ -61,7 +77,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
           const response = await axios.post(
             'http://10.0.2.2:5000/robot_request', 
             {
-              user_id: 7, 
+              user_id: userID, 
               robot_id: robotId, 
               request_status: 1,
               pickup_station: selectedStation.station_id,
@@ -72,6 +88,8 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
           if (response.status === 200) {
             onSave(selectedDestination);
             Alert.alert('Robot request successfully sent');
+            onClose();  // close the modal
+
           } else {
             Alert.alert('Failed to send the robot request');
           }
@@ -83,28 +101,77 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
     }
   };
   
-
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <Text>Select Destination</Text>
-      <Picker
-        selectedValue={selectedDestinationId}
-        onValueChange={(itemValue) =>
-          setSelectedDestinationId(itemValue as number)
-        }
-      >
-        {stations.map((station) => (
-          <Picker.Item
-            label={station.station_name}
-            value={station.station_id}
-            key={station.station_id}
-          />
-        ))}
-      </Picker>
-      <Button title="Save" onPress={handleSave} />
-      <Button title="Cancel" onPress={onClose} />
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent>
+      <View style={styles.centeredView}>
+        <View style={{...styles.modalView,backgroundColor: background}}>
+          <Text style={{ color: theme.colors.secondary }}>Select Destination</Text>
+          <Picker
+            selectedValue={selectedDestinationId}
+            onValueChange={(itemValue) =>
+              setSelectedDestinationId(itemValue as number)
+            }
+            dropdownIconColor={theme.colors.secondary}
+            selectionColor={theme.colors.secondary}
+          >
+            {stations.map((station) => (
+              <Picker.Item
+                label={station.station_name}
+                value={station.station_id}
+                key={station.station_id}
+                color={theme.colors.secondary}
+              />
+            ))}
+          </Picker>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={{...styles.button, backgroundColor: background}} onPress={handleSave}>
+              <Text style={{...styles.buttonText, color: secondary}}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{...styles.button, backgroundColor: background}} onPress={onClose}>
+              <Text style={{...styles.buttonText, color: secondary}}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    borderRadius: 20,
+    padding: 35,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: width * 0.8, 
+    // height: height * 0.3,
+  },
+  buttonContainer: {
+    // position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    padding: 20,
+  },
+  button: {
+    padding: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+    marginTop: 10,
+    width: '100%',
+  },
+  buttonText: {
+  },
+});
 
 export default AddRequestModal;

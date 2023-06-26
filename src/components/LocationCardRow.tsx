@@ -48,10 +48,11 @@ const LocationCardRow: React.FC<LocationCardRowProps> = ({
             <TouchableOpacity
               style={[
                 styles.cardBtn,
-                { backgroundColor: theme.colors.primary },
+                { backgroundColor: item.total_slot-item.slot_available === 0 ? 'gray' : theme.colors.primary }, // change the color if the button is disabled
               ]}
-              onPress={() => callRobotHandler(item)} // pass the current station to callRobotHandler
-            >
+              onPress={() => callRobotHandler(item)} 
+              disabled={item.total_slot-item.slot_available === 0} // disable the button if slot_available is 0
+                    >
               <Text style={styles.cardBtnText}>Call Robot</Text>
             </TouchableOpacity>
           </View>
