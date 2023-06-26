@@ -24,7 +24,8 @@ const AccordionItem1: React.FC<{
           <Text
             style={[
               styles.accordionTitle,
-              expanded && styles.expandedAccordionTitle,
+              { color: theme.colors.secondary },
+              expanded && { color: theme.colors.primary },,
             ]}
           >
             How to add a new appointment
@@ -33,9 +34,9 @@ const AccordionItem1: React.FC<{
         onPress={toggleExpanded}
         right={(props) =>
           expanded ? (
-            <Icon name="arrow-drop-up" size={40} color="#0000FF" {...props} />
+            <Icon name="arrow-drop-up" size={40} color={theme.colors.primary} {...props} />
           ) : (
-            <Icon name="arrow-drop-down" size={40} color="black" {...props} />
+            <Icon name="arrow-drop-down" size={40} color={theme.colors.secondary} {...props} />
           )
         }
         style={styles.listAccordion}
@@ -122,7 +123,8 @@ const AccordionItem2: React.FC<{
         <Text
           style={[
             styles.accordionTitle,
-            expanded && styles.expandedAccordionTitle,
+            { color: theme.colors.secondary },
+            expanded && { color: theme.colors.primary },,
           ]}
         >
           How to edit an appointment
@@ -131,9 +133,9 @@ const AccordionItem2: React.FC<{
       onPress={toggleExpanded}
       right={(props) =>
         expanded ? (
-          <Icon name="arrow-drop-up" size={40} color="#0000FF" {...props} />
+          <Icon name="arrow-drop-up" size={40} color={theme.colors.primary} {...props} />
         ) : (
-          <Icon name="arrow-drop-down" size={40} color="black" {...props} />
+          <Icon name="arrow-drop-down" size={40} color={theme.colors.secondary} {...props} />
         )
       }
       style={styles.listAccordion}
@@ -258,9 +260,6 @@ const styles = StyleSheet.create({
     marginTop: -10,
     fontSize: 20,
     fontWeight: 'bold',
-  },
-  expandedAccordionTitle: {
-    color: '#0000FF',
   },
   expandedImage: {
     resizeMode: 'contain',
