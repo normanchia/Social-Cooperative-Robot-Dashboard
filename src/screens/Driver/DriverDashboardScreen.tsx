@@ -6,7 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  Button,
+  ActivityIndicator,
 } from 'react-native';
 
 import { mainContainer, bodyContainer, colors } from '../../styles/styles';
@@ -39,6 +39,8 @@ const DriverDashboardScreen: React.FC = () => {
   const [stationID, setStationID] = useState<any>(null);
   const [stationRequests, setStationRequests] = useState<StationRequest[]>([]);
   const [driverRequests, setDriverRequests] = useState<DriverRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [refreshPage, setRefreshPage] = useState(false);
 
   //Variables
   const navigation = useNavigation<NavigationProp<ScreenList>>();
@@ -72,7 +74,7 @@ const DriverDashboardScreen: React.FC = () => {
   const getStationID = async (address: string) => {
     try {
       const response = await axios.get(
-        'http://10.0.2.2:5000//robotstation/' + address,
+        'http://10.0.2.2:5000/robotstation/' + address,
       );
       setStationID(response.data.station_id);
     } catch (error) {
@@ -83,16 +85,19 @@ const DriverDashboardScreen: React.FC = () => {
   //GET: Get all station requests where status = 0 ( user has reached the station to be picked up)
   const getStationRequests = async () => {
     try {
+      setIsLoading(true);
       const response = await axios.get(
         `http://10.0.2.2:5000/robot_request/station/${stationID}/status/0`,
       );
       setStationRequests(response.data);
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
+      setIsLoading(false);
     }
   };
 
-  //Accept Request
+  // Accept Request
   const acceptRequest = async (requestID: number) => {
     const newDriverRequest = {
       user_id: stationRequests[0].user_id,
@@ -114,10 +119,12 @@ const DriverDashboardScreen: React.FC = () => {
         `http://10.0.2.2:5000/robot_request/${requestID}`,
         updatedRequest,
       );
-      // Fetch the updated station requests
-      getStationRequests();
-      // Fetch the updated driver requests
-      getDriverRequests();
+
+      //Remove from state and refresh page
+      setStationRequests(prevRequests =>
+        prevRequests.filter(request => request.request_id !== requestID),
+      );
+      setRefreshPage(true);
     } catch (error) {
       console.log(error);
     }
@@ -126,13 +133,16 @@ const DriverDashboardScreen: React.FC = () => {
   //GET: Get all driver requests not completed
   const getDriverRequests = async () => {
     try {
+      setIsLoading(true);
       const response = await axios.get(
         `http://10.0.2.2:5000/driver_request/driver/${userProfile?.user_id}`,
       );
       setDriverRequests(response.data);
+      setIsLoading(false);
       console.log(response.data);
     } catch (error) {
       console.log(error);
+      setIsLoading(false);
     }
   };
 
@@ -150,8 +160,6 @@ const DriverDashboardScreen: React.FC = () => {
           newStatus = 1; // Update from status 0 to 1 (picked up)
         } else if (currentRequest.request_status === 1) {
           newStatus = 2; // Update from status 1 to 2 (in transit)
-        } else if (currentRequest.request_status === 2) {
-          newStatus = 3; // Update from status 2 to 3 (completed)
         }
 
         if (newStatus) {
@@ -171,6 +179,44 @@ const DriverDashboardScreen: React.FC = () => {
               request.request_id === requestID ? updatedRequest : request,
             ),
           );
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //Complete Request
+  const completeTrip = async (requestID: number) => {
+    try {
+      const currentRequest = driverRequests.find(
+        request => request.request_id === requestID,
+      );
+
+      if (currentRequest) {
+        let newStatus;
+
+        if (currentRequest.request_status === 2) {
+          newStatus = 3;
+        }
+
+        if (newStatus) {
+          const updatedRequest = {
+            ...currentRequest,
+            request_status: newStatus,
+          };
+
+          const response = await axios.put(
+            `http://10.0.2.2:5000/driver_request/${requestID}`,
+            updatedRequest,
+          );
+
+          //remove from state and refresh page
+          setDriverRequests(prevRequests =>
+            prevRequests.filter(request => request.request_id !== requestID),
+          );
+
+          setRefreshPage(true);
         }
       }
     } catch (error) {
@@ -209,13 +255,17 @@ const DriverDashboardScreen: React.FC = () => {
     if (stationID) {
       getStationRequests();
     }
-  }, [stationID, stationRequests]);
+  }, [stationID]);
 
   useEffect(() => {
-    if (driverRequests) {
-      console.log(driverRequests);
+    if (refreshPage) {
+      // Reset the state variable to prevent infinite refresh loop
+      setRefreshPage(false);
+
+      getStationRequests();
+      getDriverRequests();
     }
-  }, [driverRequests]);
+  }, [refreshPage]);
 
   return (
     <>
@@ -257,32 +307,59 @@ const DriverDashboardScreen: React.FC = () => {
                 </View>
               </View>
 
-              {driverRequests &&
-                driverRequests.map(driverrequest => (
-                  <View
-                    key={driverrequest.request_id}
-                    style={styles.requestContainer}
-                  >
-                    <Text style={styles.requestStatus}>
-                      Request ID: {driverrequest.request_id}
-                    </Text>
-                    <Text style={styles.requestStatus}>
-                      User ID: {driverrequest.user_id}
-                    </Text>
-                    <Text style={styles.requestStatus}>
-                      Status: {getStatusWord(driverrequest.request_status)}
-                    </Text>
+              {isLoading ? (
+                <ActivityIndicator
+                  style={{ marginTop: 20 }}
+                  size="large"
+                  color={theme.colors.primary}
+                />
+              ) : (
+                <>
+                  {driverRequests.length > 0 ? (
+                    driverRequests.map(driverrequest => (
+                      <View
+                        key={driverrequest.request_id}
+                        style={styles.requestContainer}
+                      >
+                        <Text style={styles.requestStatus}>
+                          Request ID: {driverrequest.request_id}
+                        </Text>
+                        <Text style={styles.requestStatus}>
+                          User ID: {driverrequest.user_id}
+                        </Text>
+                        <Text style={styles.requestStatus}>
+                          Status: {getStatusWord(driverrequest.request_status)}
+                        </Text>
+                        {driverrequest.request_status !== 2 && (
+                          <TouchableOpacity
+                            style={styles.buttonContainer}
+                            onPress={() =>
+                              updateRequestStatus(driverrequest.request_id)
+                            }
+                          >
+                            <Text style={styles.buttonText}>Update Status</Text>
+                          </TouchableOpacity>
+                        )}
 
-                    <TouchableOpacity
-                      style={styles.buttonContainer}
-                      onPress={() =>
-                        updateRequestStatus(driverrequest.request_id)
-                      }
-                    >
-                      <Text style={styles.buttonText}>Update Status</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
+                        {driverrequest.request_status === 2 && (
+                          <TouchableOpacity
+                            style={styles.buttonContainer}
+                            onPress={() =>
+                              completeTrip(driverrequest.request_id)
+                            }
+                          >
+                            <Text style={styles.buttonText}>Complete Trip</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.errorText}>
+                      No driver requests found
+                    </Text>
+                  )}
+                </>
+              )}
             </View>
 
             {/* Station Requests */}
@@ -305,22 +382,40 @@ const DriverDashboardScreen: React.FC = () => {
                   </Text>
                 </View>
               </View>
-              {stationRequests.map(request => (
-                <View key={request.id} style={styles.requestContainer}>
-                  <Text style={styles.requestStatus}>
-                    User ID: {request.user_id}
-                  </Text>
-                  <Text style={styles.requestStatus}>Ready be picked Up</Text>
-                  {/* Display station request details */}
 
-                  <TouchableOpacity
-                    style={styles.buttonContainer}
-                    onPress={() => acceptRequest(request.request_id)}
-                  >
-                    <Text style={styles.buttonText}>Accept</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
+              {isLoading ? (
+                <ActivityIndicator
+                  style={{ marginTop: 20 }}
+                  size="large"
+                  color={theme.colors.primary}
+                />
+              ) : (
+                <>
+                  {stationRequests.length > 0 ? (
+                    stationRequests.map(request => (
+                      <View key={request.id} style={styles.requestContainer}>
+                        <Text style={styles.requestStatus}>
+                          User ID: {request.user_id}
+                        </Text>
+                        <Text style={styles.requestStatus}>
+                          Ready be picked Up
+                        </Text>
+
+                        <TouchableOpacity
+                          style={styles.buttonContainer}
+                          onPress={() => acceptRequest(request.request_id)}
+                        >
+                          <Text style={styles.buttonText}>Accept</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.errorText}>
+                      No station requests found
+                    </Text>
+                  )}
+                </>
+              )}
             </View>
           </ScrollView>
         </View>
@@ -389,6 +484,12 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: 'red',
   },
 });
 
