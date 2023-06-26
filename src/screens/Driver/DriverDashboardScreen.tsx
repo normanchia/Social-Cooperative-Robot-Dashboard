@@ -105,10 +105,19 @@ const DriverDashboardScreen: React.FC = () => {
         newDriverRequest,
       );
 
+      // Update ROBOT request status to 4 (Finished)
+      const updatedRequest = {
+        request_status: 4,
+      };
+
+      const response2 = await axios.put(
+        `http://10.0.2.2:5000/robot_request/${requestID}`,
+        updatedRequest,
+      );
+      // Fetch the updated station requests
+      getStationRequests();
       // Fetch the updated driver requests
       getDriverRequests();
-
-      // TODO - Update the station request status to 4 (Fininshed)
     } catch (error) {
       console.log(error);
     }
@@ -174,7 +183,7 @@ const DriverDashboardScreen: React.FC = () => {
       case 0:
         return 'To be Picked Up';
       case 1:
-        return 'Picked Up';
+        return 'Picked Up User';
       case 2:
         return 'In Transit';
       case 3:
@@ -200,7 +209,13 @@ const DriverDashboardScreen: React.FC = () => {
     if (stationID) {
       getStationRequests();
     }
-  }, [stationID]);
+  }, [stationID, stationRequests]);
+
+  useEffect(() => {
+    if (driverRequests) {
+      console.log(driverRequests);
+    }
+  }, [driverRequests]);
 
   return (
     <>
@@ -211,7 +226,7 @@ const DriverDashboardScreen: React.FC = () => {
         }}
       >
         {/* Header */}
-        <Header headerText={'Driver Dashboard'} home={true} />
+        <Header headerText={'Dashboard'} home={true} />
         {/* Logout Button */}
         <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.logoutBtn}>Logout</Text>
@@ -223,64 +238,90 @@ const DriverDashboardScreen: React.FC = () => {
           </Text>
           {/* Driver Requests */}
           <ScrollView>
-            <Text
+            <View
               style={{
-                ...styles.headerText,
-                color: theme.colors.secondary,
-                fontSize: 24,
+                ...styles.cardContainer,
+                backgroundColor: theme.colors.surface,
               }}
             >
-              Driver Requests
-            </Text>
-            {driverRequests &&
-              driverRequests.map(driverrequest => (
-                <View
-                  key={driverrequest.request_id}
-                  style={styles.requestContainer}
-                >
-                  <Text style={styles.requestStatus}>
-                    Request ID: {driverrequest.request_id}
+              <View style={styles.headingRow}>
+                <View style={styles.headingTextContainer}>
+                  <Text
+                    style={{
+                      ...styles.cardHeading,
+                      color: theme.colors.secondary,
+                    }}
+                  >
+                    Driver Requests
                   </Text>
-                  <Text style={styles.requestStatus}>
-                    User ID: {driverrequest.user_id}
-                  </Text>
-                  <Text style={styles.requestStatus}>
-                    Status: {getStatusWord(driverrequest.request_status)}
-                  </Text>
+                </View>
+              </View>
 
-                  <Button
-                    title="Update Status"
-                    onPress={() =>
-                      updateRequestStatus(driverrequest.request_id)
-                    }
-                  />
+              {driverRequests &&
+                driverRequests.map(driverrequest => (
+                  <View
+                    key={driverrequest.request_id}
+                    style={styles.requestContainer}
+                  >
+                    <Text style={styles.requestStatus}>
+                      Request ID: {driverrequest.request_id}
+                    </Text>
+                    <Text style={styles.requestStatus}>
+                      User ID: {driverrequest.user_id}
+                    </Text>
+                    <Text style={styles.requestStatus}>
+                      Status: {getStatusWord(driverrequest.request_status)}
+                    </Text>
+
+                    <TouchableOpacity
+                      style={styles.buttonContainer}
+                      onPress={() =>
+                        updateRequestStatus(driverrequest.request_id)
+                      }
+                    >
+                      <Text style={styles.buttonText}>Update Status</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+            </View>
+
+            {/* Station Requests */}
+
+            <View
+              style={{
+                ...styles.cardContainer,
+                backgroundColor: theme.colors.surface,
+              }}
+            >
+              <View style={styles.headingRow}>
+                <View style={styles.headingTextContainer}>
+                  <Text
+                    style={{
+                      ...styles.cardHeading,
+                      color: theme.colors.secondary,
+                    }}
+                  >
+                    Station Requests
+                  </Text>
+                </View>
+              </View>
+              {stationRequests.map(request => (
+                <View key={request.id} style={styles.requestContainer}>
+                  <Text style={styles.requestStatus}>
+                    User ID: {request.user_id}
+                  </Text>
+                  <Text style={styles.requestStatus}>Ready be picked Up</Text>
+                  {/* Display station request details */}
+
+                  <TouchableOpacity
+                    style={styles.buttonContainer}
+                    onPress={() => acceptRequest(request.request_id)}
+                  >
+                    <Text style={styles.buttonText}>Accept</Text>
+                  </TouchableOpacity>
                 </View>
               ))}
-          </ScrollView>
-          {/* Station Requests */}
-          <ScrollView>
-            <Text
-              style={{
-                ...styles.headerText,
-                color: theme.colors.secondary,
-                fontSize: 24,
-              }}
-            >
-              Station Requests
-            </Text>
-            {stationRequests.map(request => (
-              <View key={request.id} style={styles.requestContainer}>
-                <Text style={styles.requestStatus}>
-                  User ID: {request.user_id}
-                </Text>
-                <Text style={styles.requestStatus}>Ready be picked Up</Text>
-                {/* Display station request details */}
-                <Button
-                  title="Accept"
-                  onPress={() => acceptRequest(request.request_id)}
-                />
-              </View>
-            ))}
+            </View>
           </ScrollView>
         </View>
       </SafeAreaView>
@@ -306,15 +347,48 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  requestContainer: {
-    borderWidth: 1,
-    borderColor: colors.primary,
+  cardContainer: {
+    borderRadius: 15,
+    backgroundColor: colors.white,
+    elevation: 5,
     padding: 10,
-    marginBottom: 10,
+    marginBottom: 20,
+  },
+  requestContainer: {
+    marginVertical: 10,
   },
   requestStatus: {
     fontWeight: 'bold',
     marginBottom: 10,
+    fontSize: 16,
+  },
+  headingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  headingTextContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  cardHeading: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
+  buttonContainer: {
+    backgroundColor: colors.primary,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  buttonText: {
+    color: colors.white,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

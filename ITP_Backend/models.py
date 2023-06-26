@@ -66,11 +66,11 @@ class Robot_Request(db.Model):
     pickup_station_rel = db.relationship("RobotStation", foreign_keys=[pickup_station])
     destination_station_rel = db.relationship("RobotStation", foreign_keys=[destination_station])
 
-    class Driver_Request(db.Model):
-        __tablename__ = 'driver_request'
+class Driver_Request(db.Model):
+    __tablename__ = 'driver_request'
 
-        request_id = db.Column(db.Integer, primary_key=True)
-        request_status = db.Column(db.Integer)
-        user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
-        driver_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
-        completion_time = db.Column(db.DateTime)
+    request_id = db.Column(db.Integer, primary_key=True)
+    request_status = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+    driver_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+    completion_time = db.Column(db.DateTime)
