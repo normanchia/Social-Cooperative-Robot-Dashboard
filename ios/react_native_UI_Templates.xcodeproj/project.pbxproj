@@ -9,15 +9,15 @@
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* react_native_ui_templatesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* react_native_ui_templatesTests.m */; };
 		0C80B921A6F3F58F76C31292 /* libPods-react_native_ui_templates.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-react_native_ui_templates.a */; };
+		129ECF72C2AB4F3A8639A925 /* WorkSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 66E320D3CED948CA99DCA7F4 /* WorkSans-SemiBold.ttf */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		40271F53BC104F9BBA751501 /* WorkSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 66E27084F7C448419424A139 /* WorkSans-Regular.ttf */; };
 		7699B88040F8A987B510C191 /* libPods-react_native_ui_templates-react_native_ui_templatesTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-react_native_ui_templates-react_native_ui_templatesTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		EB78AF2D81FE4DECB01B0405 /* WorkSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9BE4F23507FC49D3824F5820 /* WorkSans-Bold.ttf */; };
 		BD796BE1391B45AB88D88B57 /* WorkSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F403A969034F43D09A199DCB /* WorkSans-Medium.ttf */; };
-		40271F53BC104F9BBA751501 /* WorkSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 66E27084F7C448419424A139 /* WorkSans-Regular.ttf */; };
-		129ECF72C2AB4F3A8639A925 /* WorkSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 66E320D3CED948CA99DCA7F4 /* WorkSans-SemiBold.ttf */; };
+		EB78AF2D81FE4DECB01B0405 /* WorkSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9BE4F23507FC49D3824F5820 /* WorkSans-Bold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,13 +45,13 @@
 		5709B34CF0A7D63546082F79 /* Pods-react_native_ui_templates.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-react_native_ui_templates.release.xcconfig"; path = "Target Support Files/Pods-react_native_ui_templates/Pods-react_native_ui_templates.release.xcconfig"; sourceTree = "<group>"; };
 		5B7EB9410499542E8C5724F5 /* Pods-react_native_ui_templates-react_native_ui_templatesTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-react_native_ui_templates-react_native_ui_templatesTests.debug.xcconfig"; path = "Target Support Files/Pods-react_native_ui_templates-react_native_ui_templatesTests/Pods-react_native_ui_templates-react_native_ui_templatesTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-react_native_ui_templates.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-react_native_ui_templates.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		66E27084F7C448419424A139 /* WorkSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "WorkSans-Regular.ttf"; path = "../src/assets/fonts/WorkSans-Regular.ttf"; sourceTree = "<group>"; };
+		66E320D3CED948CA99DCA7F4 /* WorkSans-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "WorkSans-SemiBold.ttf"; path = "../src/assets/fonts/WorkSans-SemiBold.ttf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = react_native_ui_templates/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-react_native_ui_templates-react_native_ui_templatesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-react_native_ui_templates-react_native_ui_templatesTests.release.xcconfig"; path = "Target Support Files/Pods-react_native_ui_templates-react_native_ui_templatesTests/Pods-react_native_ui_templates-react_native_ui_templatesTests.release.xcconfig"; sourceTree = "<group>"; };
+		9BE4F23507FC49D3824F5820 /* WorkSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "WorkSans-Bold.ttf"; path = "../src/assets/fonts/WorkSans-Bold.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		9BE4F23507FC49D3824F5820 /* WorkSans-Bold.ttf */ = {isa = PBXFileReference; name = "WorkSans-Bold.ttf"; path = "../src/assets/fonts/WorkSans-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		F403A969034F43D09A199DCB /* WorkSans-Medium.ttf */ = {isa = PBXFileReference; name = "WorkSans-Medium.ttf"; path = "../src/assets/fonts/WorkSans-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		66E27084F7C448419424A139 /* WorkSans-Regular.ttf */ = {isa = PBXFileReference; name = "WorkSans-Regular.ttf"; path = "../src/assets/fonts/WorkSans-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		66E320D3CED948CA99DCA7F4 /* WorkSans-SemiBold.ttf */ = {isa = PBXFileReference; name = "WorkSans-SemiBold.ttf"; path = "../src/assets/fonts/WorkSans-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F403A969034F43D09A199DCB /* WorkSans-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "WorkSans-Medium.ttf"; path = "../src/assets/fonts/WorkSans-Medium.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,7 +158,7 @@
 			sourceTree = "<group>";
 		};
 		F70819F473404DF1A08E38B3 /* Resources */ = {
-			isa = "PBXGroup";
+			isa = PBXGroup;
 			children = (
 				9BE4F23507FC49D3824F5820 /* WorkSans-Bold.ttf */,
 				F403A969034F43D09A199DCB /* WorkSans-Medium.ttf */,
@@ -166,8 +166,8 @@
 				66E320D3CED948CA99DCA7F4 /* WorkSans-SemiBold.ttf */,
 			);
 			name = Resources;
-			sourceTree = "<group>";
 			path = "";
+			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
@@ -232,7 +232,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "react_native_ui_templates" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "react_native_UI_Templates" */;
 			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -714,7 +714,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "react_native_ui_templates" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "react_native_UI_Templates" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,

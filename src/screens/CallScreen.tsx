@@ -1,22 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   SafeAreaView,
   StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  FlatList,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { showToast } from '../util/action';
-import { mainContainer, bodyContainer, colors } from '../styles/styles';
-import Header from '../components/Header';
-import EditFavouritesModal from '../components/EditFavoritesModal';
-import LocationCardRow from '../components/LocationCardRow';
-import RequestCardRow from '../components/RequestCardRow';
-import { useTheme } from 'react-native-paper';
-import axios from 'axios';
+  ScrollView,
+} from "react-native";
+import { mainContainer, bodyContainer, colors } from "../styles/styles";
+import Header from "../components/Header";
+import LocationCardRow from "../components/LocationCardRow";
+import RequestCardRow from "../components/RequestCardRow";
+import { useTheme } from "react-native-paper";
+import axios from "axios";
+import AddRequestModal from "../components/AddRequestModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Robot_Request {
   user_id: number;
@@ -37,138 +34,126 @@ interface Station {
   total_slot: number;
 }
 
-interface Location {
-  id: number;
-  name: string;
-}
-
-
 const CallScreen: React.FC = () => {
   // States
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [searchResults, setSearchResults] = useState<Location[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null,
-  );
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const theme = useTheme(); // use the theme hook
+  const [userID, setUserID] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
-
+  const [addRequestModal, toggleRequestModal] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
   const [robot_requests, setRequests] = useState<Robot_Request[]>([]);
+  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+  const [fetchAllData, setFetchAllData] = useState<(() => Promise<void>) | null>(null);
 
   // Get: All Station
   const fetchStations = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get(
-        `http://10.0.2.2:5000/robotstations`,
-      );
-      if (response.status === 200) {
-        setStations(response.data);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+    const response = await axios.get(`http://10.0.2.2:5000/robotstations`);
+    if (response.status === 200) {
+      setStations(response.data);
     }
   };
-  
+
   // Get: Existing Request
-  const fetchRequests = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get(
-        `http://10.0.2.2:5000/robot_request/user/7/status_not/0`,
-      );
-      if (response.status === 200) {
-        setRequests(response.data);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
-  // Handlers
-  const callRobotHandler = () => {
-    showToast('Calling Robot');
-  };
-
-  // Update your handler to accept a Robot_Request
-const completeHandler = async (request: Robot_Request) => {
-  console.log("completeHandler called with request:", request); 
-  try {
-    setIsLoading(true);
-    const response = await axios.put(
-      `http://10.0.2.2:5000/robot_request/${request.request_id}`,
-      { 
-        request_status: 0
-      }
+  const fetchRequests = async (userId: number) => {
+    const response = await axios.get(
+      `http://10.0.2.2:5000/robot_request/user/${userId}/status_not/0`
     );
     if (response.status === 200) {
-      showToast('Journey completed.');
-
-      // Remove the completed request from the state
-      setRequests(prevRobotRequests => 
-        prevRobotRequests.filter(req => req.request_id !== request.request_id)
-      );
-
-      // Call the robot/station API endpoint
-      const updateRobotStationResponse = await axios.put(
-        `http://10.0.2.2:5000/robot/${request.robot_id}/station/${request.destination_station_id}`
-      );
-      if(updateRobotStationResponse.status === 200){
-        showToast('Robot and station updated successfully.');
-        // You can update your state related to robot or station here, if necessary
-        fetchStations();
-      } else {
-        showToast('Failed to update robot and station.');
-      }
-
-      // Call the update_slots API endpoint
-      const updateSlotsResponse = await axios.put(`http://10.0.2.2:5000/update_slots`);
-      if(updateSlotsResponse.status === 200){
-        showToast('Slots updated successfully.');
-        // You can update your state related to slots here, if necessary
-      } else {
-        showToast('Failed to update slots.');
-      }
-
+      setRequests(response.data);
     }
-  } catch (error) {
-    console.log(error);
-  } finally {
-    setIsLoading(false);
-  }
-}
-
-// Make sure to update your onPress call to pass the entire item:
-// onPress={() => completeHandler(item)}
-
-
-  const toggleEditModal = () => {
-    setShowEditModal(!showEditModal);
   };
 
-  const seacrhTextHandler = (text: string) => {
-    setSearchText(text);
-    setDropdownVisible(text !== '');
-   };
+  const completeHandler = useCallback(async (request: Robot_Request) => {
+    console.log("completeHandler called with request:", request);
+    try {
+      setIsLoading(true);
+      const response = await axios.put(
+        `http://10.0.2.2:5000/robot_request/${request.request_id}`,
+        {
+          request_status: 0, //close the robot request
+        }
+      );
+      if (response.status === 200) {
+        console.log("Journey completed.");
+        // Remove the completed request from the state
+        setRequests((prevRobotRequests) =>
+          prevRobotRequests.filter(
+            (req) => req.request_id !== request.request_id
+          )
+        );
 
-  const searchResultHandler = (item: Location) => {
-    setSelectedLocation(item);
-    setSearchText(item.name);
-    setDropdownVisible(false);
-  };
+        // Call the robot/station API endpoint
+        const updateRobotStationResponse = await axios.put(
+          `http://10.0.2.2:5000/robot/${request.robot_id}/station/${request.destination_station_id}`
+        ); //update the robot parked location in sql
+        if (updateRobotStationResponse.status === 200) {
+          console.log("Robot and station updated successfully.");
+        } else {
+          console.log("Failed to update robot and station.");
+        }
+
+        // Call the update_slots API endpoint
+        const updateSlotsResponse = await axios.put(
+          `http://10.0.2.2:5000/update_slots`
+        );
+        if (updateSlotsResponse.status === 200) {
+          console.log("Slots updated successfully.");
+        } else {
+          console.log("Failed to update slots.");
+        }
+
+        // If fetchAllData is defined, call it to fetch all data again
+        if (fetchAllData) {
+          await fetchAllData();
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchAllData]); // Add fetchAllData to the dependency array of useCallback
 
   useEffect(() => {
-    fetchStations();
-    fetchRequests();
+    AsyncStorage.getItem("userProfileID").then((ID) => {
+      if (ID != null) {
+        setUserID(ID);
+
+        const fetchAllDataFunc = async () => {
+          setIsLoading(true);
+          try {
+            await Promise.all([fetchStations(), fetchRequests(parseInt(ID))]);
+          } catch (error) {
+            console.log(error);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        setFetchAllData(() => fetchAllDataFunc);
+        
+        fetchAllDataFunc();
+      }
+    });
   }, []);
+
+  const toggleModal = () => {
+    toggleRequestModal(!addRequestModal);
+    if (addRequestModal) {
+      setSelectedStation(null);
+    }
+  };
+
+  const callRobotHandler = (station: Station) => {
+    setSelectedStation(station);
+    toggleModal();
+  };
+
+  const createRobotRequest = async (destination: Station) => {
+    if (!selectedStation) return;
+    if (fetchAllData) {
+      await fetchAllData();
+    }
+  };
 
   return (
     <>
@@ -179,49 +164,18 @@ const completeHandler = async (request: Robot_Request) => {
         }}
       >
         {/* Header */}
-        <Header headerText={'Request Robot'} />
+        <Header headerText={"Request Robot"} />
         {/* Main Content */}
-        <View style={bodyContainer.container}>
-
-          {showEditModal && <EditFavouritesModal onSave={toggleEditModal} />}
-          {/* Search bar */}
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Enter Destination"
-            value={searchText}
-            onChangeText={seacrhTextHandler}
-            placeholderTextColor={theme.colors.secondary}
-          />
-          {/* Search Results */}
-          {dropdownVisible && (
-            <View
-              style={{
-                ...styles.dropdownContainer,
-                backgroundColor: theme.colors.surface,
-              }}
-            >
-              <FlatList
-                data={searchResults}
-                keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.dropdownItem}
-                    onPress={() => searchResultHandler(item)}
-                  >
-                    <Text
-                      style={{
-                        ...styles.dropdownText,
-                        color: theme.colors.secondary,
-                      }}
-                    >
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
+        <ScrollView style={bodyContainer.container}>
+          {addRequestModal && (
+            <AddRequestModal
+              visible={addRequestModal}
+              stations={stations}
+              selectedStation={selectedStation!}
+              onSave={createRobotRequest}
+              onClose={toggleModal}
+            />
           )}
-        
           {/* Existing Booking */}
           <View
             style={{
@@ -229,7 +183,6 @@ const completeHandler = async (request: Robot_Request) => {
               backgroundColor: theme.colors.surface,
             }}
           >
-            
             <View style={styles.headingRow}>
               <View style={styles.headingTextContainer}>
                 <Text
@@ -241,9 +194,6 @@ const completeHandler = async (request: Robot_Request) => {
                   Current Request
                 </Text>
               </View>
-              {/* <TouchableOpacity onPress={toggleEditModal}>
-                <Icon size={30} name="edit" color={theme.colors.secondary} />
-              </TouchableOpacity> */}
             </View>
             <View style={styles.border} />
             <RequestCardRow
@@ -269,7 +219,7 @@ const completeHandler = async (request: Robot_Request) => {
               callRobotHandler={callRobotHandler}
             />
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </>
   );
@@ -284,21 +234,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 10,
     marginBottom: 10,
   },
   headingTextContainer: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   cardHeading: {
     fontSize: 25,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    textDecorationLine: 'underline',
+    fontWeight: "bold",
+    textAlign: "center",
+    textDecorationLine: "underline",
   },
   border: {
     borderBottomWidth: 1,
@@ -314,7 +264,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   dropdownContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     left: 0,
     right: 0,
@@ -332,7 +282,7 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

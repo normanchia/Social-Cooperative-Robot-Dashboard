@@ -72,3 +72,13 @@ def update_slots():
 
     return jsonify([{'station_id': s.station_id, 'station_name': s.station_name, 'station_location': s.station_location,
                      'total_slot': s.total_slot, 'slot_available': s.slot_available} for s in updated_stations])
+
+# Get RobotStation by station_name
+@robotstation_blueprint.route('/robotstation/<string:station_name>', methods=['GET'])
+def get_robotstation_by_name(station_name):
+    station = RobotStation.query.filter_by(station_name=station_name).first()
+    if station:
+        return jsonify({'station_id': station.station_id, 'station_name': station.station_name, 'station_location': station.station_location,
+                        'total_slot': station.total_slot, 'slot_available': station.slot_available})
+    else:
+        return jsonify({'message': 'Robot station not found!'}), 404
