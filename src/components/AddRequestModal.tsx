@@ -112,7 +112,6 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
               setSelectedDestinationId(itemValue as number)
             }
             dropdownIconColor={theme.colors.secondary}
-            selectionColor={theme.colors.secondary}
           >
             {stations.map((station) => (
               <Picker.Item
