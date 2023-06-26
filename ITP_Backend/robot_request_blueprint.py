@@ -111,3 +111,27 @@ def get_robot_requests_by_destination_station(destination_station_id, request_st
                          'completion_time': r.completion_time.strftime('%Y-%m-%d %H:%M:%S') if r.completion_time else None} for r in requests])
     else:
         return jsonify({'message': 'No requests found for this destination station with given status!'}), 404
+
+
+@robot_request_blueprint.route('/robot_request/user/<int:user_id>/status_notIn/<status_list>', methods=['GET'])
+def get_user_notIn_requests(user_id, status_list):
+    status_list = [int(status) for status in status_list.split(',')]
+    requests = Robot_Request.query.filter(Robot_Request.user_id == user_id, ~Robot_Request.request_status.in_(status_list)).all()
+    if requests:
+        return jsonify([
+            {
+                'request_id': r.request_id,
+                'request_status': r.request_status,
+                'user_id': r.user_id,
+                'robot_id': r.robot_id,
+                'pickup_station_id': r.pickup_station,
+                'pickup_station_name': r.pickup_station_rel.station_name,
+                'destination_station_id': r.destination_station,
+                'destination_station_name': r.destination_station_rel.station_name,
+                'request_time': r.request_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'completion_time': r.completion_time.strftime('%Y-%m-%d %H:%M:%S') if r.completion_time else None
+            }
+            for r in requests
+        ])
+    else:
+        return jsonify({'message': 'No requests found for this user with given status!'}), 404
