@@ -52,11 +52,6 @@ const DashboardScreen: React.FC = () => {
     navigation.navigate('LoginScreen');
   };
 
-  //Call Robot Handler
-  const callRobotHandler = () => {
-    // Send request to backend to call robot
-  };
-
   // Get User's Appointments
   const fetchAppointments = async (userId: number) => {
     try {
@@ -179,15 +174,6 @@ const DashboardScreen: React.FC = () => {
                     }}
                   >
                     <ApptCardRow appt={[appointment]} />
-                    <TouchableOpacity
-                      style={{
-                        ...styles.cardBtn,
-                        backgroundColor: theme.colors.primary,
-                      }}
-                      onPress={callRobotHandler}
-                    >
-                      <Text style={styles.cardBtnText}>Call Robot</Text>
-                    </TouchableOpacity>
                   </View>
                 ))
               ) : (
