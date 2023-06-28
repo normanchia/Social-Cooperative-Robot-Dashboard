@@ -4,14 +4,8 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import {
-  Button,
-  Dialog,
-  IconButton,
-  Portal,
-  useTheme,
-} from 'react-native-paper';
+import { Text, StyleSheet } from 'react-native';
+import { Button, Dialog, Portal, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Appointment {
@@ -26,10 +20,15 @@ interface Appointment {
 
 interface ApptDialogProps {
   appt: Appointment | null;
+  btnMessage: string;
   onClose: () => void;
 }
 
-const ApptDialog: React.FC<ApptDialogProps> = ({ appt, onClose }) => {
+const ApptDialog: React.FC<ApptDialogProps> = ({
+  appt,
+  btnMessage,
+  onClose,
+}) => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [isVisible, setVisible] = useState(false);
@@ -48,54 +47,53 @@ const ApptDialog: React.FC<ApptDialogProps> = ({ appt, onClose }) => {
         dismissable={true}
         dismissableBackButton={true}
       >
-        <Dialog.Title>
-          <Text style={[styles.headerTxt]}>{appt?.appointment_title}</Text>
-        </Dialog.Title>
-        <Dialog.Content>
-          {/* <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <Text style={[styles.headerTxt]}>{appt?.appointment_title}</Text>
-            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-              <Icon.Button
-                name="delete"
-                color={'#b01515'}
-                backgroundColor={'transparent'}
-                borderRadius={20}
-                style={{
-                  padding: 4,
-                  paddingLeft: 9,
-                  paddingRight: 0,
-                  //   borderWidth: 1,
-                  //   borderColor: '#000',
-                }}
-                size={30}
-                onPress={() => console.log('pressed del uwu')}
-              />
-            </View>
-          </View> */}
-          <Text style={styles.hospitalTxt}>{appt?.hospital_name}</Text>
-          <Text style={styles.dateTimeTxt}>{appt?.appointment_date}</Text>
-          <Text style={styles.dateTimeTxt}>{appt?.appointment_time}</Text>
-          <Text style={styles.notesTxt}>{appt?.additional_note}</Text>
-        </Dialog.Content>
+        {/* Show Dialog if appt is true */}
+        {btnMessage === 'Edit Appointment' ? (
+          <>
+            <Dialog.Title>
+              <Text style={[styles.headerTxt]}>{appt?.appointment_title}</Text>
+            </Dialog.Title>
+            <Dialog.Content>
+              <Text style={styles.hospitalTxt}>{appt?.hospital_name}</Text>
+              <Text style={styles.dateTimeTxt}>{appt?.appointment_date}</Text>
+              <Text style={styles.dateTimeTxt}>{appt?.appointment_time}</Text>
+              <Text style={styles.notesTxt}>{appt?.additional_note}</Text>
+            </Dialog.Content>
+          </>
+        ) : (
+          // Show dialog if it's delete prompt
+          <>
+            <Dialog.Title>
+              <Text>Are you sure you want to delete this appointment?</Text>
+            </Dialog.Title>
+            <Dialog.Content>
+              <Text>
+                Tap outside this box or press the back button if you do not wish
+                to delete the appointment. Else, please tap the "DELETE" button.
+              </Text>
+            </Dialog.Content>
+          </>
+        )}
+
         <Dialog.Actions>
           <Button
             onPress={() => {
               hideDialog();
               if (appt) {
-                navigation.navigate('AddAppointmentScreen', {
-                  appointment: appt,
-                  screenIntent: 'editAppointment',
-                });
+                btnMessage === 'Edit Appointment' &&
+                  navigation.navigate('AddAppointmentScreen', {
+                    appointment: appt,
+                    screenIntent: 'editAppointment',
+                  });
+              } else {
+                console.log('Yo you wanted this deleted.'),
+                  navigation.navigate('AddAppointmentScreen', {
+                    screenIntent: 'deleteAppointment',
+                  });
               }
             }}
           >
-            Edit Appointment
+            {btnMessage}
           </Button>
           {/* <Button onPress={hideDialog}>Delete Appointment</Button> */}
         </Dialog.Actions>
