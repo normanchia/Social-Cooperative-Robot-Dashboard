@@ -56,7 +56,7 @@ const CallScreen: React.FC = () => {
   // Get: Existing Request
   const fetchRequests = async (userId: number) => {
     const response = await axios.get(
-      `http://10.0.2.2:5000/robot_request/user/${userId}/status_not/0`
+      `http://10.0.2.2:5000/robot_request/user/${userId}/status_notIn/0,4`,
     );
     if (response.status === 200) {
       setRequests(response.data);
