@@ -34,13 +34,7 @@ import {
 } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApptDialog from '../components/ApptDialog';
-import { da } from 'date-fns/locale';
-import { transparent } from 'react-native-paper/lib/typescript/src/styles/themes/v2/colors';
-import { formatISO } from 'date-fns/esm';
-
-const testToast = () => {
-  showToast('This is a test toast 🍞');
-};
+import LoadingIndicator from '../components/LoadingIndicator';
 
 interface IAppointment {
   appointment_id: number;
@@ -52,12 +46,10 @@ interface IAppointment {
   appointment_title: string;
 }
 
-// interface iSectionToggle {
-//   title: string;
-//   data: { text: string }[];
-// }
-
 const AppointmentScreen: React.FC = () => {
+  const localTimeNow = new Date(); // Local time
+
+  // Navigation
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const navigateToAddAppt = () => {
     navigation.navigate('AddAppointmentScreen', {
@@ -86,10 +78,8 @@ const AppointmentScreen: React.FC = () => {
     }
   };
 
-  const [hourCDC, setHour] = useState<number>();
-  const [minuteCDC, setMinute] = useState<number>();
-  const [dateTimeObjCDC, setdateTimeObj] = useState<Date>();
   const convertDateCustom = (date: string) => {
+    // date: string format ==> 19 Jun 2023
     const apptDateParts = date.split(' ');
     const yeaR = parseInt(apptDateParts[2], 10);
     const month = [
@@ -113,17 +103,14 @@ const AppointmentScreen: React.FC = () => {
 
   const fetchAppointments = async (userId: number) => {
     // convert appt_date to Date object
-
     try {
       const response = await axios.get(
         `http://10.0.2.2:5000/appointment/user/${userId}`,
       );
       if (response.status === 200) {
-        const today = new Date();
-        today.setUTCHours(today.getUTCHours() + 8);
         const allAppointments = response.data;
 
-        // Filter appointments before today
+        // Filter appointments before today (Past appointments)
         const appointmentsBeforeToday = allAppointments.filter(
           (appointment: IAppointment) => {
             const appointmentDate = parse(
@@ -134,8 +121,15 @@ const AppointmentScreen: React.FC = () => {
             appointmentDate.setSeconds(
               appointmentDate.getSeconds() + appointment.appointment_time,
             );
-            appointmentDate.setUTCHours(appointmentDate.getUTCHours() - 7); //appt date correct
-            return isBefore(appointmentDate, today);
+
+            // console.log(
+            //   appointmentDate,
+            //   '<->',
+            //   '\ttoday',
+            //   localTimeNow,
+            //   isBefore(appointmentDate, localTimeNow),
+            // );
+            return isBefore(appointmentDate, localTimeNow);
           },
         );
 
@@ -150,18 +144,10 @@ const AppointmentScreen: React.FC = () => {
             appointmentDate.setSeconds(
               appointmentDate.getSeconds() + appointment.appointment_time,
             );
-            appointmentDate.setUTCHours(appointmentDate.getUTCHours() - 7); //appt date correct
-            // console.log(
-            //   appointmentDate,
-            //   '<->',
-            //   '\ttoday',
-            //   today,
-            //   isAfter(appointmentDate, today),
-            // );
 
             return (
-              isAfter(appointmentDate, today) ||
-              differenceInMinutes(appointmentDate, today) >= 1
+              isAfter(appointmentDate, localTimeNow) ||
+              differenceInMinutes(appointmentDate, localTimeNow) >= 1
             );
           },
         );
@@ -172,7 +158,7 @@ const AppointmentScreen: React.FC = () => {
       console.log('AppointmentScreen:', error);
     }
   };
-  const [loading, setLoading] = useState(false); // loading indicator when first visit page
+  const [isLoading, setLoading] = useState(true); // loading indicator when first visit page
   useEffect(() => {
     setLoading(true); // Add loading circle initially
     // Get appointments for the user
@@ -188,11 +174,8 @@ const AppointmentScreen: React.FC = () => {
   const [userID, setUserID] = useState<string>();
 
   useEffect(() => {
-    setLoading(true); // Add loading circle initially
     if (isFocused || userID) {
-      // console.log('refreshing sectionlist...');
       userID ? fetchAppointments(parseInt(userID)) : null;
-      setLoading(false);
     } else {
       setLoading(true);
     }
@@ -200,9 +183,7 @@ const AppointmentScreen: React.FC = () => {
 
   //          ===== SECTION LIST =====
   // For refreshing and updating past appointments
-  const wait = (timeout: number) => {
-    return new Promise<void>(resolve => setTimeout(resolve, timeout));
-  };
+
   const [refreshing, setRefreshing] = useState(false); // SectionList refresh to get past appt
   const [sectionsUpcomingAppointment, setSectionsUpcomingAppt] = useState<
     SectionListData<any, {}>[]
@@ -264,58 +245,52 @@ const AppointmentScreen: React.FC = () => {
       );
     };
 
+    const generateAppointmentData = async (
+      appointments: any[],
+      sortAscending: boolean,
+    ) => {
+      return await Promise.all(
+        sortAppt(appointments, sortAscending).map(async appointment => {
+          const hospitalName = await fetchHospitalNames(
+            appointment.hospital_id,
+          );
+          return {
+            appointment_id: appointment.appointment_id,
+            hospital_id: appointment.hospital_id,
+            hospital_name: hospitalName,
+            appointment_date: formatDate(appointment.appointment_date),
+            appointment_time: formatTime(appointment.appointment_time),
+            additional_note: appointment.additional_note,
+            appointment_title: appointment.appointment_title,
+          };
+        }),
+      );
+    };
+
     const pastAppointmentsData = {
       title: 'Past Appointments',
-      data: await Promise.all(
-        sortAppt(pastAppointments, false).map(async appointment => {
-          const hospitalName = await fetchHospitalNames(
-            appointment.hospital_id,
-          );
-          return {
-            appointment_id: appointment.appointment_id,
-            hospital_id: appointment.hospital_id,
-            hospital_name: hospitalName,
-            appointment_date: formatDate(appointment.appointment_date),
-            appointment_time: formatTime(appointment.appointment_time),
-            additional_note: appointment.additional_note,
-            appointment_title: appointment.appointment_title,
-          };
-        }),
-      ),
+      data: await generateAppointmentData(pastAppointments, false),
     };
+
     const upcomingAppointmentsData = {
       title: 'Upcoming Appointments',
-      data: await Promise.all(
-        sortAppt(upcomingAppointments, true).map(async appointment => {
-          const hospitalName = await fetchHospitalNames(
-            appointment.hospital_id,
-          );
-          return {
-            appointment_id: appointment.appointment_id,
-            hospital_id: appointment.hospital_id,
-            hospital_name: hospitalName,
-            appointment_date: formatDate(appointment.appointment_date),
-            appointment_time: formatTime(appointment.appointment_time),
-            additional_note: appointment.additional_note,
-            appointment_title: appointment.appointment_title,
-          };
-        }),
-      ),
+      data: await generateAppointmentData(upcomingAppointments, true),
     };
 
     setSectionsPastAppt([pastAppointmentsData]);
     setSectionsUpcomingAppt([upcomingAppointmentsData]);
+    setLoading(false);
   };
 
+  // Whenever past or upcoming appointments edited/added, format the data & refresh
   useEffect(() => {
     formatSectionData();
   }, [pastAppointments, upcomingAppointments]);
 
-  const onRefresh = () => {
+  const onSectionListRefresh = () => {
     // Section List pull down to get past appointments
     if (refreshing) {
-      // Prevent multiple refreshes
-      return;
+      return; // Prevent multiple refreshes
     }
     setRefreshing(true);
     if (userID) {
@@ -334,11 +309,31 @@ const AppointmentScreen: React.FC = () => {
 
   // Dialog box
   const [isDialogVisible, setDialogVisible] = useState(false);
+  const [isDialogIntentEdit, setDialogIntentEdit] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<IAppointment | null>(null);
   const onApptCardTap = (item: IAppointment) => {
-    // console.log(item);
     setSelectedAppointment(item);
+    const itemDate = convertDateCustom(item.appointment_date);
+    const itemTime = item.appointment_time.toString().split(' ');
+    const itemTimeMins = parseInt(itemTime[0].split(':')[1]);
+    const itemTimeHrs =
+      itemTime[1] === 'AM'
+        ? parseInt(itemTime[0].split(':')[0])
+        : parseInt(itemTime[0].split(':')[0]) + 12;
+    const itemDateTime = new Date(
+      itemDate.year,
+      itemDate.month,
+      itemDate.day,
+      itemTimeHrs,
+      itemTimeMins,
+    );
+    new Date();
+    if (isBefore(itemDateTime, localTimeNow)) {
+      setDialogIntentEdit(false); // Delete intent for past appt
+    } else {
+      setDialogIntentEdit(true);
+    }
     setDialogVisible(true);
   };
 
@@ -358,28 +353,28 @@ const AppointmentScreen: React.FC = () => {
     },
     cardContainerToday: {
       borderRadius: 15,
-      backgroundColor: theme.colors.errorContainer,
+      backgroundColor: theme.dark ? '#320B0B' : '#F8DEDE',
       elevation: 10,
       padding: 5,
       marginLeft: 10,
       marginRight: 10,
       marginTop: 5,
       marginBottom: 5,
-      borderColor: theme.colors.error,
-      borderWidth: 4,
+      borderColor: '#C52E2E',
+      borderWidth: 8,
     },
     cardContainerTmr: {
       borderRadius: 15,
-      backgroundColor: 'orange',
-      elevation: 10,
+      backgroundColor: theme.dark ? '#372406' : '#FBEEDA',
+
       padding: 5,
       marginLeft: 10,
       marginRight: 10,
       marginTop: 5,
       marginBottom: 5,
-
-      borderColor: 'orange',
-      borderWidth: 2,
+      borderColor: '#E99E2F',
+      borderWidth: 0,
+      borderLeftWidth: 10,
     },
     cardContainerPast: {
       backgroundColor: theme.dark
@@ -388,10 +383,10 @@ const AppointmentScreen: React.FC = () => {
     },
     cardContainerUpcoming: {
       // borderLeftColor: 'mediumseagreen',
-      borderLeftColor: theme.colors.primary,
-      borderLeftWidth: 4,
-      borderRadius: 4.5,
-      left: -5,
+      // borderLeftColor: theme.colors.primary,
+      borderLeftColor: '#58AF90',
+      borderLeftWidth: 10,
+      borderRadius: 15,
     },
 
     cardHeading: {
@@ -441,7 +436,7 @@ const AppointmentScreen: React.FC = () => {
       fontSize: 18,
       height: 'auto',
       fontWeight: 'bold',
-      color: '#DF3079',
+      color: theme.dark ? '#F49ABE' : '#A81A55',
     },
     apptItemDateTime: {
       padding: 10,
@@ -486,14 +481,8 @@ const AppointmentScreen: React.FC = () => {
         {/* ===== MAIN CONTENT ===== */}
 
         {/* SectionList */}
-        {loading ? (
-          <>
-            <ActivityIndicator
-              style={{ marginTop: 20 }}
-              size={'large'}
-              color={theme.colors.primary}
-            />
-          </>
+        {isLoading ? (
+          <LoadingIndicator />
         ) : (
           <SectionList
             sections={
@@ -525,19 +514,14 @@ const AppointmentScreen: React.FC = () => {
               // Adding it to apptDate
               apptDate.setSeconds(apptDate.getSeconds() + sam);
 
-              // Today adjustment
-              const todaY = new Date();
-              todaY.setUTCHours(new Date().getUTCHours() + 8);
-
               // Tmr adjustment
               const tomorrow = new Date();
-              tomorrow.setUTCDate(new Date().getUTCDate() + 1);
+              tomorrow.setUTCDate(localTimeNow.getDate() + 1);
 
-              // COmparing
-              const isItSameDay = differenceInMinutes(apptDate, todaY) < 720; // within 12hrs
-              const isItTmr = differenceInMinutes(apptDate, tomorrow) < 2160; // within 36hrs
-              console.log(apptDate, '<->', todaY);
-
+              // Comparing
+              const isItSameDay =
+                differenceInMinutes(apptDate, localTimeNow) < 24 * 60; // within 24hrs (960min)
+              const isItTmr = differenceInMinutes(apptDate, tomorrow) < 36 * 60; // within 36hrs (2160min)
               // const isItSameDay = isSameDay(apptDate, todaY);
               // const isItTmr = isSameDay(apptDate, tomorrow);
 
@@ -547,11 +531,11 @@ const AppointmentScreen: React.FC = () => {
                   style={
                     section.title === 'Upcoming Appointments'
                       ? isItSameDay
-                        ? [styles.cardContainerToday]
+                        ? [styles.cardContainerToday] // same day & upcoming
                         : isItTmr
-                        ? styles.cardContainerTmr
-                        : styles.cardContainer
-                      : [styles.cardContainer, styles.cardContainerPast]
+                        ? styles.cardContainerTmr // tmr & upcoming
+                        : [styles.cardContainer, styles.cardContainerUpcoming] // not soon & upcoming
+                      : [styles.cardContainer, styles.cardContainerPast] // past
                   }
                 >
                   {/* Content in each card */}
@@ -561,26 +545,24 @@ const AppointmentScreen: React.FC = () => {
                         section.title === 'Upcoming Appointments'
                           ? isItSameDay
                             ? {
-                                borderLeftWidth: 0,
-                                borderRadius: 10,
-                                // backgroundColor: theme.colors.errorContainer,
+                                // borderLeftWidth: 0,
+                                // borderRadius: 10,
                               }
                             : isItTmr
                             ? {
                                 borderRadius: 10,
-                                backgroundColor: theme.colors.background,
                               }
-                            : [styles.cardContainerUpcoming]
+                            : null
                           : styles.cardContainerPast
                       }
                     >
-                      <Text style={styles.apptItemDateTime}>
+                      <Text style={[styles.apptItemDateTime]}>
                         {item.appointment_date}
                       </Text>
-                      <Text style={styles.apptItemDateTime}>
+                      <Text style={[styles.apptItemDateTime]}>
                         {item.appointment_time}
                       </Text>
-                      <Text style={styles.apptItem}>
+                      <Text style={[styles.apptItem]}>
                         {item.appointment_title} @{item.hospital_name}
                       </Text>
 
@@ -606,7 +588,8 @@ const AppointmentScreen: React.FC = () => {
                 style={styles.footerText}
                 onPress={() => navigateToAddAppt()}
               >
-                {section.data.length === 0
+                {section.data.length === 0 &&
+                section.title === 'Upcoming Appointments'
                   ? `No upcoming appointments.\nAdd a new appointment?`
                   : null}
               </Text>
@@ -615,7 +598,7 @@ const AppointmentScreen: React.FC = () => {
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
-                onRefresh={onRefresh}
+                onRefresh={onSectionListRefresh}
                 colors={[theme.colors.primary]}
               />
             }
@@ -626,7 +609,9 @@ const AppointmentScreen: React.FC = () => {
         {isDialogVisible && (
           <ApptDialog
             appt={selectedAppointment}
-            btnMessage="Edit Appointment"
+            btnMessage={
+              isDialogIntentEdit ? 'Edit Appointment' : 'Delete Appointment'
+            }
             onClose={() => setDialogVisible(false)}
           />
         )}

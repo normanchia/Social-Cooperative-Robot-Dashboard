@@ -3,10 +3,11 @@ import {
   ParamListBase,
   useNavigation,
 } from '@react-navigation/native';
+import axios from 'axios';
 import React, { useState } from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, View } from 'react-native';
 import { Button, Dialog, Portal, useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { showToast } from '../util/action';
 
 interface Appointment {
   appointment_id: number;
@@ -38,14 +39,58 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
     onClose();
   };
 
+  const deleteAppointmentDatabase = async (apptID: number) => {
+    try {
+      const response = await axios.delete(
+        `http://10.0.2.2:5000/appointment/${apptID}`,
+      );
+      if (response.status === 200) {
+        showToast('Appointment deleted!');
+      } else {
+        showToast('Error deleting appointment, please try again later.');
+      }
+    } catch (error) {
+      console.log('Error deleting appointment:', error);
+    }
+  };
+
+  const styles = StyleSheet.create({
+    dialogStlye: {
+      backgroundColor: theme.colors.background,
+      borderColor: theme.dark ? theme.colors.onBackground : 'transparent',
+      borderWidth: 5,
+    },
+    headerTxt: {
+      color: theme.colors.secondary,
+      fontSize: 30,
+    },
+    hospitalTxt: {
+      color: theme.colors.secondary,
+      fontSize: 22,
+      fontWeight: 'bold',
+    },
+    dateTimeTxt: { color: theme.colors.secondary, fontSize: 20 },
+    notesTxt: {
+      color: theme.dark ? '#F49ABE' : '#121',
+      fontSize: 16,
+      fontWeight: 'bold',
+      fontStyle: 'italic',
+    },
+    actionbuttonStyle: {
+      color: theme.colors.primary,
+      fontSize: 18,
+      textDecorationLine: 'underline',
+    },
+  });
+
   return (
     <Portal>
       <Dialog
-        // theme={{ colors: { primary: useTheme().colors.backdrop } }}
         visible={true}
         onDismiss={hideDialog}
         dismissable={true}
         dismissableBackButton={true}
+        style={styles.dialogStlye}
       >
         {/* Show Dialog if appt is true */}
         {btnMessage === 'Edit Appointment' ? (
@@ -67,10 +112,10 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
               <Text>Are you sure you want to delete this appointment?</Text>
             </Dialog.Title>
             <Dialog.Content>
-              <Text>
-                Tap outside this box or press the back button if you do not wish
-                to delete the appointment. Else, please tap the "DELETE" button.
-              </Text>
+              <Text style={styles.hospitalTxt}>{appt?.hospital_name}</Text>
+              <Text style={styles.dateTimeTxt}>{appt?.appointment_date}</Text>
+              <Text style={styles.dateTimeTxt}>{appt?.appointment_time}</Text>
+              <Text style={styles.notesTxt}>{appt?.additional_note}</Text>
             </Dialog.Content>
           </>
         )}
@@ -80,20 +125,31 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
             onPress={() => {
               hideDialog();
               if (appt) {
-                btnMessage === 'Edit Appointment' &&
+                if (btnMessage === 'Edit Appointment') {
                   navigation.navigate('AddAppointmentScreen', {
                     appointment: appt,
                     screenIntent: 'editAppointment',
                   });
+                } else if (btnMessage === 'Delete Appointment') {
+                  console.log('appt id:', appt.appointment_id);
+                  deleteAppointmentDatabase(appt.appointment_id);
+                  navigation.navigate('AppointmentScreen');
+                }
               } else {
-                console.log('Yo you wanted this deleted.'),
-                  navigation.navigate('AddAppointmentScreen', {
-                    screenIntent: 'deleteAppointment',
-                  });
+                console.log('Missing appt data');
               }
             }}
           >
-            {btnMessage}
+            <Text
+              style={[
+                styles.actionbuttonStyle,
+                btnMessage === 'Delete Appointment' && {
+                  color: theme.colors.error,
+                },
+              ]}
+            >
+              {btnMessage}
+            </Text>
           </Button>
           {/* <Button onPress={hideDialog}>Delete Appointment</Button> */}
         </Dialog.Actions>
@@ -101,20 +157,5 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
     </Portal>
   );
 };
-
-const styles = StyleSheet.create({
-  headerTxt: {
-    color: '#000',
-    fontSize: 30,
-  },
-  hospitalTxt: { color: '#000', fontSize: 22, fontWeight: 'bold' },
-  dateTimeTxt: { color: '#000', fontSize: 20 },
-  notesTxt: {
-    color: '#121',
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontStyle: 'italic',
-  },
-});
 
 export default ApptDialog;
