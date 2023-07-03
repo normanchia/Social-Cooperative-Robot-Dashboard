@@ -15,6 +15,7 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useTheme } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { set } from 'date-fns';
 
 type ScreenList = {
   LoginScreen: undefined;
@@ -41,6 +42,8 @@ const DriverDashboardScreen: React.FC = () => {
   const [driverRequests, setDriverRequests] = useState<DriverRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshPage, setRefreshPage] = useState(false);
+  const [stationUsernames, setStationUsernames] = useState<string[]>([]);
+  const [driverUsernames, setDriverUsernames] = useState<string[]>([]);
 
   //Variables
   const navigation = useNavigation<NavigationProp<ScreenList>>();
@@ -70,6 +73,33 @@ const DriverDashboardScreen: React.FC = () => {
     }
   };
 
+  //GET: Username from ID
+  const getUsername = async (id: number) => {
+    try {
+      const response = await axios.get('http://10.0.2.2:5000/user/' + id);
+      return response.data.username;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
+
+  // Fetch usernames for all user IDs in stationRequests
+  const fetchUsernames = async () => {
+    if (stationRequests.length > 0) {
+      const usernames = await Promise.all(
+        stationRequests.map(request => getUsername(request.user_id)),
+      );
+      setStationUsernames(usernames);
+    }
+
+    if (driverRequests.length > 0) {
+      const usernames = await Promise.all(
+        driverRequests.map(request => getUsername(request.user_id)),
+      );
+      setDriverUsernames(usernames);
+    }
+  };
   //GET: Robot Station ID from Address
   const getStationID = async (address: string) => {
     try {
@@ -98,9 +128,9 @@ const DriverDashboardScreen: React.FC = () => {
   };
 
   // Accept Request
-  const acceptRequest = async (requestID: number) => {
+  const acceptRequest = async (requestID: number, userID: number) => {
     const newDriverRequest = {
-      user_id: stationRequests[0].user_id,
+      user_id: userID,
       driver_id: userProfile?.user_id,
     };
 
@@ -267,6 +297,14 @@ const DriverDashboardScreen: React.FC = () => {
     }
   }, [refreshPage]);
 
+  useEffect(() => {
+    fetchUsernames();
+  }, [stationRequests]);
+
+  useEffect(() => {
+    fetchUsernames();
+  }, [driverRequests]);
+
   return (
     <>
       <SafeAreaView
@@ -316,7 +354,7 @@ const DriverDashboardScreen: React.FC = () => {
               ) : (
                 <>
                   {driverRequests.length > 0 ? (
-                    driverRequests.map(driverrequest => (
+                    driverRequests.map((driverrequest, index) => (
                       <View
                         key={driverrequest.request_id}
                         style={styles.requestContainer}
@@ -325,7 +363,7 @@ const DriverDashboardScreen: React.FC = () => {
                           Request ID: {driverrequest.request_id}
                         </Text>
                         <Text style={styles.requestStatus}>
-                          User ID: {driverrequest.user_id}
+                          User: {driverUsernames[index]}
                         </Text>
                         <Text style={styles.requestStatus}>
                           Status: {getStatusWord(driverrequest.request_status)}
@@ -392,10 +430,10 @@ const DriverDashboardScreen: React.FC = () => {
               ) : (
                 <>
                   {stationRequests.length > 0 ? (
-                    stationRequests.map(request => (
+                    stationRequests.map((request, index) => (
                       <View key={request.id} style={styles.requestContainer}>
                         <Text style={styles.requestStatus}>
-                          User ID: {request.user_id}
+                          User: {stationUsernames[index]}
                         </Text>
                         <Text style={styles.requestStatus}>
                           Ready be picked Up
@@ -403,7 +441,9 @@ const DriverDashboardScreen: React.FC = () => {
 
                         <TouchableOpacity
                           style={styles.buttonContainer}
-                          onPress={() => acceptRequest(request.request_id)}
+                          onPress={() =>
+                            acceptRequest(request.request_id, request.user_id)
+                          }
                         >
                           <Text style={styles.buttonText}>Accept</Text>
                         </TouchableOpacity>
