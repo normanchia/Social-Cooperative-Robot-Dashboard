@@ -13,7 +13,11 @@ import { useTheme } from 'react-native-paper';
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import {
+  useNavigation,
+  NavigationProp,
+  useIsFocused,
+} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { format, isSameDay, parse, parseISO, parseJSON } from 'date-fns';
@@ -40,6 +44,7 @@ const DashboardScreen: React.FC = () => {
   //Variables
   const theme = useTheme(); // use the theme hook
   const navigation = useNavigation<NavigationProp<ScreenList>>();
+  const isFocused = useIsFocused();
 
   //Handlers
 
@@ -60,35 +65,31 @@ const DashboardScreen: React.FC = () => {
         `http://10.0.2.2:5000/appointment/user/${userId}`,
       );
       if (response.status === 200) {
-        const filteredAppointments = response.data.filter(
-          (appointment: Appointment) => {
-            const apptDateRaw = new Date(appointment.appointment_date);
-            const todayDateRaw = new Date();
+        const appointments = response.data;
+        const today = new Date();
 
-            // Set both to be same GMT time cause Date() doesnt return the correct timezone
-            apptDateRaw.setUTCHours(apptDateRaw.getUTCHours() + 8);
-            todayDateRaw.setUTCHours(todayDateRaw.getUTCHours() + 8);
+        // Set the timezone offset to GMT+8
+        today.setUTCHours(today.getUTCHours() + 8);
 
-            // Force comparison because couldn't get isSameDay to work :P
-            const appointmentDateFormatted = apptDateRaw
-              .toISOString()
-              .split('T')[0];
-            const todayDateFormatted = todayDateRaw.toISOString().split('T')[0];
-            return appointmentDateFormatted === todayDateFormatted; // T/F
-            // isSameDay(
-            //   parse(
-            //     appointment.appointment_date,
-            //     "EEE dd MMM yyyy HH:mm:ss 'GMT'",
-            //     new Date(),
-            //   ),
-            //   today),
-            // );
-            console.log('\nToday', appointmentDateFormatted);
-            console.log('ApptDate', todayDateFormatted);
-            console.log(appointmentDateFormatted === todayDateFormatted, '\n');
-          },
-        );
-        setAppointments(filteredAppointments);
+        const todayAppointments = appointments.filter((appointment: any) => {
+          const appointmentDate = new Date(appointment.appointment_date);
+
+          // Set the timezone offset to GMT+8
+          appointmentDate.setUTCHours(appointmentDate.getUTCHours() + 8);
+
+          // Compare the appointment date with today's date
+          return isSameDay(appointmentDate, today);
+        });
+
+        console.log('Today:', today);
+        console.log("Today's Appointments:", todayAppointments);
+
+        // console log appt time
+        todayAppointments.forEach((appt: any) => {
+          console.log('appt time:', appt.appointment_time);
+        });
+
+        setAppointments(todayAppointments);
       }
     } catch (error) {
       console.log(error);
@@ -122,12 +123,11 @@ const DashboardScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (userProfile) {
+    if (isFocused && userProfile) {
       fetchAppointments(userProfile.user_id);
       AsyncStorage.setItem('userProfileID', userProfile.user_id.toString()); // Stored locally to use in appt screen
     }
-  }, [userProfile]);
-
+  }, [isFocused, userProfile]);
   return (
     <>
       <SafeAreaView
