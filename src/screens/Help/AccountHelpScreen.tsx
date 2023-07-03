@@ -20,7 +20,7 @@ const AccountHelpScreen: React.FC = () => {
         {/* Main Content */}
         <View style={{ ...bodyContainer.container }}>
           <Text style={{ ...styles.headerText, color: theme.colors.secondary }}>
-            Title
+            FAQ on Account Settings
           </Text>
         </View>
       </SafeAreaView>
