@@ -16,9 +16,11 @@ import { useTheme } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { set } from 'date-fns';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 type ScreenList = {
   LoginScreen: undefined;
+  DriverProfileScreen: undefined;
 };
 
 type StationRequest = {
@@ -49,8 +51,11 @@ const DriverDashboardScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<ScreenList>>();
   const theme = useTheme();
 
-  const handleLogout = () => {
-    // Perform logout
+  const handleLogout = async () => {
+    // Clear the access token from storage
+    await AsyncStorage.removeItem('access_token');
+
+    // Navigate to the login screen or any other desired screen
     navigation.navigate('LoginScreen');
   };
 
@@ -321,9 +326,18 @@ const DriverDashboardScreen: React.FC = () => {
         </TouchableOpacity>
         {/* Main Content */}
         <View style={bodyContainer.container}>
-          <Text style={{ ...styles.headerText, color: theme.colors.secondary }}>
-            Driver for {userProfile?.address}
-          </Text>
+          {/* Header */}
+          <View style={{ ...styles.buttonContainer, marginBottom: 20 }}>
+            <View>
+              <Text style={{ ...styles.buttonText, textAlign: 'left' }}>
+                Driver Name: {userProfile?.username}
+              </Text>
+              <Text style={{ ...styles.buttonText, textAlign: 'left' }}>
+                Driver Station: {userProfile?.address}
+              </Text>
+            </View>
+          </View>
+
           {/* Driver Requests */}
           <ScrollView>
             <View
@@ -340,7 +354,7 @@ const DriverDashboardScreen: React.FC = () => {
                       color: theme.colors.secondary,
                     }}
                   >
-                    Driver Requests
+                    Ongoing Requests
                   </Text>
                 </View>
               </View>
@@ -392,9 +406,7 @@ const DriverDashboardScreen: React.FC = () => {
                       </View>
                     ))
                   ) : (
-                    <Text style={styles.errorText}>
-                      No driver requests found
-                    </Text>
+                    <Text style={styles.errorText}>No requests found</Text>
                   )}
                 </>
               )}
@@ -416,7 +428,7 @@ const DriverDashboardScreen: React.FC = () => {
                       color: theme.colors.secondary,
                     }}
                   >
-                    Station Requests
+                    Incomming Requests
                   </Text>
                 </View>
               </View>
@@ -450,9 +462,7 @@ const DriverDashboardScreen: React.FC = () => {
                       </View>
                     ))
                   ) : (
-                    <Text style={styles.errorText}>
-                      No station requests found
-                    </Text>
+                    <Text style={styles.errorText}>No requests found</Text>
                   )}
                 </>
               )}
@@ -495,7 +505,7 @@ const styles = StyleSheet.create({
   requestStatus: {
     fontWeight: 'bold',
     marginBottom: 10,
-    fontSize: 16,
+    fontSize: 18,
   },
   headingRow: {
     flexDirection: 'row',
@@ -524,6 +534,7 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: 'bold',
     textAlign: 'center',
+    fontSize: 18,
   },
   errorText: {
     fontSize: 20,
