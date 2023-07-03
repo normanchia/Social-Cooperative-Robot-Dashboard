@@ -5,9 +5,10 @@ import {
 } from '@react-navigation/native';
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Text, StyleSheet, View } from 'react-native';
+import { Text, StyleSheet, View, Platform } from 'react-native';
 import { Button, Dialog, Portal, useTheme } from 'react-native-paper';
 import { showToast } from '../util/action';
+import { Linking } from 'react-native';
 
 interface Appointment {
   appointment_id: number;
@@ -33,6 +34,11 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [isVisible, setVisible] = useState(false);
+
+  // Variables
+  const btnEditText = 'Edit Appointment';
+  const btnDeleteText = 'Delete Appointment';
+  const btnTimeZoneText = 'Change Timezone';
 
   const hideDialog = () => {
     setVisible(false);
@@ -93,7 +99,7 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
         style={styles.dialogStlye}
       >
         {/* Show Dialog if appt is true */}
-        {btnMessage === 'Edit Appointment' ? (
+        {btnMessage === btnEditText ? (
           <>
             <Dialog.Title>
               <Text style={[styles.headerTxt]}>{appt?.appointment_title}</Text>
@@ -105,7 +111,7 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
               <Text style={styles.notesTxt}>{appt?.additional_note}</Text>
             </Dialog.Content>
           </>
-        ) : (
+        ) : btnMessage === btnDeleteText ? (
           // Show dialog if it's delete prompt
           <>
             <Dialog.Title>
@@ -118,25 +124,47 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
               <Text style={styles.notesTxt}>{appt?.additional_note}</Text>
             </Dialog.Content>
           </>
-        )}
+        ) : btnMessage === btnTimeZoneText ? (
+          <>
+            <Dialog.Title>
+              <Text>Your timezone is not based in Singapore</Text>
+            </Dialog.Title>
+            <Dialog.Content>
+              <Text>
+                This application is made for use in Singapore only. Please
+                change your timezone to Singapore, GMT+8 before continuing using
+                the application.
+              </Text>
+            </Dialog.Content>
+          </>
+        ) : null}
 
         <Dialog.Actions>
           <Button
             onPress={() => {
               hideDialog();
               if (appt) {
-                if (btnMessage === 'Edit Appointment') {
+                if (btnMessage === btnEditText) {
                   navigation.navigate('AddAppointmentScreen', {
                     appointment: appt,
                     screenIntent: 'editAppointment',
                   });
-                } else if (btnMessage === 'Delete Appointment') {
+                } else if (btnMessage === btnDeleteText) {
                   console.log('appt id:', appt.appointment_id);
                   deleteAppointmentDatabase(appt.appointment_id);
+                  navigation.navigate('AddAppointmentScreen');
                   navigation.navigate('AppointmentScreen');
                 }
               } else {
-                console.log('Missing appt data');
+                if (btnMessage === btnTimeZoneText) {
+                  Platform.OS === 'ios'
+                    ? Linking.openURL(
+                        'App-Prefs:root=General&path=DATE_AND_TIME',
+                      )
+                    : Linking.sendIntent('android.settings.DATE_SETTINGS');
+                } else {
+                  console.log('Missing appt data');
+                }
               }
             }}
           >
@@ -151,7 +179,6 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
               {btnMessage}
             </Text>
           </Button>
-          {/* <Button onPress={hideDialog}>Delete Appointment</Button> */}
         </Dialog.Actions>
       </Dialog>
     </Portal>

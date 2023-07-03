@@ -25,11 +25,12 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { showToast } from '../util/action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DatePicker from 'react-native-date-picker';
-import { ActivityIndicator, useTheme } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import isBefore from 'date-fns/isBefore';
 import LoadingIndicator from '../components/LoadingIndicator';
+import ApptDialog from '../components/ApptDialog';
 
 interface IAppointment {
   appointment_id: number;
@@ -50,6 +51,7 @@ const AddAppointmentScreen: React.FC = () => {
   };
   const [isIntentEdit, setIsIntentEdit] = useState(false);
   const [isIntentAdd, setIsIntentAdd] = useState(false);
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [userID, setUserID] = useState(0);
 
   //    Keyboard focus    //
@@ -505,15 +507,8 @@ const AddAppointmentScreen: React.FC = () => {
         {isIntentEdit && (
           <TouchableOpacity
             onPress={() => {
-              // setDialogVisible(true);
+              setIsDialogVisible(true);
               setIsLoading(true);
-              // animate and change style of delete button button with style deleteApptBtn
-              // if (isIntentDelete) {
-              //   console.log('delete');
-              // } else {
-              //   console.log('nothing');
-              // }
-              deleteAppointmentDatabase(appointment.appointment_id);
             }}
           >
             <Text style={[styles.deleteApptBtn]}>
@@ -522,15 +517,17 @@ const AddAppointmentScreen: React.FC = () => {
             </Text>
           </TouchableOpacity>
         )}
-
         {/* Dialogbox */}
-        {/* {isDialogVisible && (
+        {isDialogVisible && (
           <ApptDialog
-            appt={null}
-            btnMessage="DELETE"
-            onClose={() => setDialogVisible(false)}
+            appt={appointment}
+            btnMessage={'Delete Appointment'}
+            onClose={() => {
+              setIsLoading(false);
+              setIsDialogVisible(false);
+            }}
           />
-        )} */}
+        )}
 
         {/* Main Content */}
         <ScrollView>

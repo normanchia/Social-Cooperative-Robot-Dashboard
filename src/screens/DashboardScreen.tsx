@@ -20,7 +20,7 @@ import {
 } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { format, isSameDay, parse, parseISO, parseJSON } from 'date-fns';
+import { isSameDay } from 'date-fns';
 import ApptCardRow from '../components/ApptCardRow';
 
 type ScreenList = {
@@ -39,14 +39,13 @@ const DashboardScreen: React.FC = () => {
   //States
   const [userProfile, setUserProfile] = useState<any>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [todayDatem, setTodayDate] = useState<Date>(new Date());
   const [isLoading, setIsLoading] = useState(false);
 
   //Variables
   const theme = useTheme(); // use the theme hook
   const navigation = useNavigation<NavigationProp<ScreenList>>();
   const isFocused = useIsFocused();
-
-  //Handlers
 
   //Logout Handler
   const handleLogout = async () => {
@@ -67,15 +66,10 @@ const DashboardScreen: React.FC = () => {
       if (response.status === 200) {
         const appointments = response.data;
         const today = new Date();
-
-        // Set the timezone offset to GMT+8
-        today.setUTCHours(today.getUTCHours() + 8);
+        setTodayDate(today);
 
         const todayAppointments = appointments.filter((appointment: any) => {
           const appointmentDate = new Date(appointment.appointment_date);
-
-          // Set the timezone offset to GMT+8
-          appointmentDate.setUTCHours(appointmentDate.getUTCHours() + 8);
 
           // Compare the appointment date with today's date
           return isSameDay(appointmentDate, today);
@@ -85,9 +79,9 @@ const DashboardScreen: React.FC = () => {
         console.log("Today's Appointments:", todayAppointments);
 
         // console log appt time
-        todayAppointments.forEach((appt: any) => {
-          console.log('appt time:', appt.appointment_time);
-        });
+        // todayAppointments.forEach((appt: any) => {
+        //   console.log('appt time:', appt.appointment_time);
+        // });
 
         setAppointments(todayAppointments);
       }
@@ -168,10 +162,21 @@ const DashboardScreen: React.FC = () => {
                 appointments.map(appointment => (
                   <View
                     key={appointment.appointment_id}
-                    style={{
-                      ...styles.cardContainer,
-                      backgroundColor: theme.colors.surface,
-                    }}
+                    style={
+                      appointment.appointment_time >
+                      todayDatem.getHours() * 3600 +
+                        todayDatem.getMinutes() * 60
+                        ? // AFter current time
+                          {
+                            ...styles.cardContainerToday,
+                            backgroundColor: theme.dark ? '#320B0B' : '#F8DEDE',
+                          }
+                        : //Before current time
+                          {
+                            ...styles.cardContainer,
+                            backgroundColor: theme.colors.surface,
+                          }
+                    }
                   >
                     <ApptCardRow appt={[appointment]} />
                   </View>
@@ -213,6 +218,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderLeftWidth: 5,
     borderLeftColor: colors.primary,
+  },
+
+  cardContainerToday: {
+    borderRadius: 15,
+    elevation: 5,
+    padding: 10,
+    marginBottom: 20,
+    borderColor: '#C52E2E',
+    borderWidth: 8,
   },
 
   cardText: {

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,15 +12,13 @@ import {
 
 import { mainContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
-import { ScrollView } from 'react-native-gesture-handler';
-import { showToast } from '../util/action';
 import {
   useNavigation,
   NavigationProp,
   ParamListBase,
   useIsFocused,
 } from '@react-navigation/native';
-import { ActivityIndicator, useTheme } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import axios from 'axios';
 import {
   differenceInMinutes,
@@ -121,14 +119,6 @@ const AppointmentScreen: React.FC = () => {
             appointmentDate.setSeconds(
               appointmentDate.getSeconds() + appointment.appointment_time,
             );
-
-            // console.log(
-            //   appointmentDate,
-            //   '<->',
-            //   '\ttoday',
-            //   localTimeNow,
-            //   isBefore(appointmentDate, localTimeNow),
-            // );
             return isBefore(appointmentDate, localTimeNow);
           },
         );
@@ -183,7 +173,8 @@ const AppointmentScreen: React.FC = () => {
 
   //          ===== SECTION LIST =====
   // For refreshing and updating past appointments
-
+  const sectionListRef = useRef<SectionList>(null);
+  const [showPastAppt, setShowPastAppt] = useState<boolean>(false); // Show past appt
   const [refreshing, setRefreshing] = useState(false); // SectionList refresh to get past appt
   const [sectionsUpcomingAppointment, setSectionsUpcomingAppt] = useState<
     SectionListData<any, {}>[]
@@ -191,6 +182,19 @@ const AppointmentScreen: React.FC = () => {
   const [sectionsPastAppointment, setSectionsPastAppt] = useState<
     SectionListData<any, {}>[]
   >([]);
+
+  const scrollToPastApptSection = () => {
+    try {
+      sectionListRef.current?.scrollToLocation({
+        sectionIndex: 0,
+        itemIndex: sectionsUpcomingAppointment[0].data.length + 1,
+        animated: true,
+      });
+    } catch (error) {
+      console.log('\x1b[91m Error animating to past appt section \x1b[0m');
+      return null;
+    }
+  };
 
   //  === Formatting data to be useable in SectionLists ===
   const formatTime = (time: number) => {
@@ -282,11 +286,6 @@ const AppointmentScreen: React.FC = () => {
     setLoading(false);
   };
 
-  // Whenever past or upcoming appointments edited/added, format the data & refresh
-  useEffect(() => {
-    formatSectionData();
-  }, [pastAppointments, upcomingAppointments]);
-
   const onSectionListRefresh = () => {
     // Section List pull down to get past appointments
     if (refreshing) {
@@ -307,7 +306,8 @@ const AppointmentScreen: React.FC = () => {
     }
   };
 
-  // Dialog box
+  // Dialog box & footer
+  const [isFooterAdd, setFooterAdd] = useState(false);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isDialogIntentEdit, setDialogIntentEdit] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
@@ -337,6 +337,16 @@ const AppointmentScreen: React.FC = () => {
     setDialogVisible(true);
   };
 
+  // Whenever past or upcoming appointments edited/added, format the data & refresh
+  useEffect(() => {
+    formatSectionData();
+    showPastAppt;
+  }, [pastAppointments, upcomingAppointments, showPastAppt, refreshing]);
+
+  useEffect(() => {
+    scrollToPastApptSection();
+  }, [showPastAppt]);
+
   const styles = StyleSheet.create({
     mainContainerBackgroundColor: {
       backgroundColor: theme.colors.background,
@@ -344,7 +354,7 @@ const AppointmentScreen: React.FC = () => {
     cardContainer: {
       borderRadius: 15,
       backgroundColor: theme.colors.background,
-      elevation: 10,
+      elevation: 5,
       padding: 5,
       marginLeft: 10,
       marginRight: 10,
@@ -354,7 +364,7 @@ const AppointmentScreen: React.FC = () => {
     cardContainerToday: {
       borderRadius: 15,
       backgroundColor: theme.dark ? '#320B0B' : '#F8DEDE',
-      elevation: 10,
+      elevation: 5,
       padding: 5,
       marginLeft: 10,
       marginRight: 10,
@@ -382,8 +392,6 @@ const AppointmentScreen: React.FC = () => {
         : theme.colors.background,
     },
     cardContainerUpcoming: {
-      // borderLeftColor: 'mediumseagreen',
-      // borderLeftColor: theme.colors.primary,
       borderLeftColor: '#58AF90',
       borderLeftWidth: 10,
       borderRadius: 15,
@@ -459,9 +467,10 @@ const AppointmentScreen: React.FC = () => {
       fontWeight: 'bold',
     },
     footerText: {
-      color: theme.colors.secondary,
+      color: theme.colors.outline,
       textAlign: 'center',
-      padding: 10,
+      padding: 15,
+      paddingTop: 20,
       fontSize: 18,
       lineHeight: 25,
     },
@@ -474,22 +483,33 @@ const AppointmentScreen: React.FC = () => {
       >
         {/* Header */}
         <Header headerText={'Appointments'} />
-        <TouchableOpacity onPress={navigateToAddAppt}>
+        <TouchableOpacity
+          onPress={() => {
+            navigateToAddAppt();
+            setShowPastAppt(false);
+          }}
+        >
           <Text style={[styles.addNewApptBtn]}>+{'\u00A0'} Add new Appt</Text>
         </TouchableOpacity>
 
         {/* ===== MAIN CONTENT ===== */}
-
         {/* SectionList */}
         {isLoading ? (
           <LoadingIndicator />
         ) : (
           <SectionList
+            ref={sectionListRef}
             sections={
-              [
-                ...sectionsUpcomingAppointment,
-                ...sectionsPastAppointment,
-              ] as SectionListData<IAppointment>[]
+              showPastAppt
+                ? // Show past appointmets
+                  ([
+                    ...sectionsUpcomingAppointment,
+                    ...sectionsPastAppointment,
+                  ] as SectionListData<IAppointment>[])
+                : // Show upcoming appointments only
+                  ([
+                    ...sectionsUpcomingAppointment,
+                  ] as SectionListData<IAppointment>[])
             }
             renderItem={({ item, section }) => {
               const convertedDate = convertDateCustom(item.appointment_date);
@@ -522,8 +542,6 @@ const AppointmentScreen: React.FC = () => {
               const isItSameDay =
                 differenceInMinutes(apptDate, localTimeNow) < 24 * 60; // within 24hrs (960min)
               const isItTmr = differenceInMinutes(apptDate, tomorrow) < 36 * 60; // within 36hrs (2160min)
-              // const isItSameDay = isSameDay(apptDate, todaY);
-              // const isItTmr = isSameDay(apptDate, tomorrow);
 
               return (
                 <TouchableOpacity
@@ -544,16 +562,13 @@ const AppointmentScreen: React.FC = () => {
                       style={
                         section.title === 'Upcoming Appointments'
                           ? isItSameDay
-                            ? {
-                                // borderLeftWidth: 0,
-                                // borderRadius: 10,
-                              }
-                            : isItTmr
+                            ? null // same day & upcoming
+                            : isItTmr // tmr & upcoming
                             ? {
                                 borderRadius: 10,
                               }
-                            : null
-                          : styles.cardContainerPast
+                            : null // not soon & upcoming
+                          : styles.cardContainerPast // past
                       }
                     >
                       <Text style={[styles.apptItemDateTime]}>
@@ -584,15 +599,45 @@ const AppointmentScreen: React.FC = () => {
               <Text style={styles.apptSectionHeader}>{section.title}</Text>
             )}
             renderSectionFooter={({ section }) => (
-              <Text
-                style={styles.footerText}
-                onPress={() => navigateToAddAppt()}
-              >
-                {section.data.length === 0 &&
-                section.title === 'Upcoming Appointments'
-                  ? `No upcoming appointments.\nAdd a new appointment?`
-                  : null}
-              </Text>
+              <>
+                {
+                  // Control which footer will appear under upcomingg appt section
+                  section.title === 'Upcoming Appointments'
+                    ? section.data.length === 0 // 0 upcoming appt
+                      ? setFooterAdd(true) // add new appt txt
+                      : setFooterAdd(false) // >0 upcoming appt, show past appt txt
+                    : null
+                }
+
+                {/* Render footer */}
+                {isFooterAdd && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigateToAddAppt();
+                      setShowPastAppt(false);
+                    }}
+                  >
+                    <Text
+                      style={styles.footerText}
+                    >{`No upcoming appointments.\nAdd a new appointment?`}</Text>
+                  </TouchableOpacity>
+                )}
+                {!isFooterAdd && !showPastAppt ? (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setShowPastAppt(true);
+                    }}
+                  >
+                    <Text
+                      style={styles.footerText}
+                    >{`No upcoming appointments left. \n Tap here to see past appointments.`}</Text>
+                  </TouchableOpacity>
+                ) : null}
+                <Text
+                  style={styles.footerText}
+                  onPress={() => setFooterAdd(false)}
+                ></Text>
+              </>
             )}
             keyExtractor={item => `basicListEntry-${item.appointment_id}`}
             refreshControl={
