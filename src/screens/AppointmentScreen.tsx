@@ -486,7 +486,6 @@ const AppointmentScreen: React.FC = () => {
         <TouchableOpacity
           onPress={() => {
             navigateToAddAppt();
-            setShowPastAppt(false);
           }}
         >
           <Text style={[styles.addNewApptBtn]}>+{'\u00A0'} Add new Appt</Text>
