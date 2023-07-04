@@ -140,8 +140,9 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
                 <Picker.Item
                   label={station.station_name}
                   value={station.station_id}
-                  key={station.station_id.toString()} // Made key a string
+                  key={station.station_id.toString()}
                   color={theme.colors.secondary}
+                  style={{ backgroundColor: theme.colors.background}}
                 />
               ))}
             </Picker>
