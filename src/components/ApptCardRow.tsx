@@ -28,17 +28,29 @@ const ApptCardRow: React.FC<ApptCardRowProps> = ({ appt }) => {
   const theme = useTheme(); // use the theme hook
 
   // Handlers
-  const convertTime = (time: number) => {
-    const appointmentTime = new Date(time * 1000);
-    appointmentTime.setUTCHours(appointmentTime.getUTCHours() + 8); // change to GMT +8
-    const hours = appointmentTime.getHours();
-    const minutes = appointmentTime.getMinutes();
-    const period = hours >= 12 ? 'pm' : 'am';
-    const formattedHours = hours % 12 || 12;
-    const formattedMinutes = minutes.toString().padStart(2, '0');
-    const formattedTime = `${formattedHours}:${formattedMinutes} ${period}`;
-    return formattedTime;
-  };
+  // const convertTime = (time: number) => {
+  //   const appointmentTime = new Date(time * 1000);
+  //   appointmentTime.setUTCHours(appointmentTime.getUTCHours() + 8); // change to GMT +8
+  //   const hours = appointmentTime.getHours();
+  //   const minutes = appointmentTime.getMinutes();
+  //   const period = hours >= 12 ? 'pm' : 'am';
+  //   const formattedHours = hours % 12 || 12;
+  //   const formattedMinutes = minutes.toString().padStart(2, '0');
+  //   const formattedTime = `${formattedHours}:${formattedMinutes} ${period}`;
+  //   return formattedTime;
+  // };
+
+  function convertTime(time: number) {
+    const hours = Math.floor(time / 3600); // Get the hours portion
+    const minutes = Math.floor((time % 3600) / 60); // Get the minutes portion
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12; // Convert 0 to 12
+
+    // Pad the minutes with leading zero if necessary
+    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+    return `${formattedHours}:${formattedMinutes} ${ampm}`;
+  }
 
   // UseEffect Hook
   useEffect(() => {
