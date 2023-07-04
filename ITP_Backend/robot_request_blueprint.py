@@ -16,9 +16,12 @@ def create_robot_request():
         robot.robot_status = 0
         db.session.commit()
 
+        # Convert the timestamp from milliseconds to a Python datetime object
+        request_time = datetime.fromtimestamp(data['request_time'] / 1000.0)
+
         new_request = Robot_Request(request_status=data['request_status'], user_id=data['user_id'],
                                     robot_id=data['robot_id'], pickup_station=data['pickup_station'],
-                                    destination_station=data['destination_station'], request_time=datetime.utcnow())
+                                    destination_station=data['destination_station'], request_time=request_time)
         db.session.add(new_request)
         db.session.commit()
         return jsonify({'message': 'New robot request created and robot status set to 0!'})

@@ -13,6 +13,7 @@ interface Robot_Request {
     pickup_station_id: number;
     destination_station_id: number;
     robot_id: number;
+    request_time: Date;
   }
 
 interface RequestCardRowProps {
@@ -52,7 +53,9 @@ const RequestCardRow: React.FC<RequestCardRowProps> = ({
             <Text style={{ color: theme.colors.secondary }}>
               {item.pickup_station_name} - {item.destination_station_name} 
             </Text>
-
+            <Text style={{ color: theme.colors.secondary }}>
+              Pick Up Time: {new Date(item.request_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+            </Text>
           </View>
           <View>
             <TouchableOpacity

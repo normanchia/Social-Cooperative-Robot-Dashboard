@@ -7,11 +7,14 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  Button,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
 import { useTheme } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import DatePicker from 'react-native-date-picker';
+
 interface Station {
   station_id: number;
   station_name: string;
@@ -44,6 +47,9 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
     stations[0].station_id
   );
 
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   useEffect(() => {
     const getUserId = async () => {
       const userId = await AsyncStorage.getItem("userProfileID");
@@ -54,6 +60,10 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
 
     getUserId();
   }, []);
+
+  const showDatepicker = () => {
+    setShowDatePicker(true);
+  };
 
   const handleSave = async () => {
     if (selectedDestinationId) {
@@ -76,7 +86,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
 
           // Use the robot_id of the first robot in the list
           const robotId = robots[0].robot_id;
-
+          console.log(date.getTime())
           // Post the robot request
           const response = await axios.post(
             "http://10.0.2.2:5000/robot_request",
@@ -86,6 +96,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
               request_status: 1,
               pickup_station: selectedStation.station_id,
               destination_station: selectedDestination.station_id,
+              request_time: date.getTime(),
             }
           );
 
@@ -123,20 +134,36 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
                 setSelectedDestinationId(itemValue as number)
               }
               dropdownIconColor={theme.colors.secondary}
-              style={{ backgroundColor: theme.colors.background }} // Added backgroundColor here
+              style={{ backgroundColor: theme.colors.background }} 
             >
               {stations.map((station) => (
                 <Picker.Item
                   label={station.station_name}
                   value={station.station_id}
-                  key={station.station_id}
+                  key={station.station_id.toString()} // Made key a string
                   color={theme.colors.secondary}
-                  style={{ backgroundColor: theme.colors.background }} // Added backgroundColor here
                 />
               ))}
             </Picker>
           </View>
           <View style={styles.buttonContainer}>
+          <Text style={{ color: theme.colors.secondary }}>Select Time</Text>
+          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <Text>{date.toLocaleTimeString()}</Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <View>
+              <DatePicker
+                date={date}
+                onDateChange={setDate}
+                mode="time"
+                minimumDate={new Date(Date.now())} // Set minimum date to now
+                maximumDate={new Date(Date.now() + 24*60*60*1000)} // Set maximum date to 24 hours from now    
+                style={{ backgroundColor: theme.colors.background, width: 200 }}
+              />
+              <Button title="OK" onPress={() => setShowDatePicker(false)} />
+            </View>
+          )}
             <TouchableOpacity
               style={{ ...styles.button, backgroundColor: theme.colors.background }}
               onPress={handleSave}
@@ -150,7 +177,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
               onPress={onClose}
             >
               <Text style={{ ...styles.buttonText, color: theme.colors.secondary }}>
-                Cancel
+                Close
               </Text>
             </TouchableOpacity>
           </View>

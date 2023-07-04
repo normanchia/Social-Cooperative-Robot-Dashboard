@@ -24,6 +24,7 @@ interface Robot_Request {
   robot_id: number;
   pickup_station_id: number;
   destination_station_id: number;
+  request_time: Date; 
 }
 
 interface Station {
