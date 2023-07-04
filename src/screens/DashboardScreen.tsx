@@ -13,10 +13,14 @@ import { useTheme } from 'react-native-paper';
 import { mainContainer, bodyContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import {
+  useNavigation,
+  NavigationProp,
+  useIsFocused,
+} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { format, isSameDay, parse, parseISO, parseJSON } from 'date-fns';
+import { isSameDay } from 'date-fns';
 import ApptCardRow from '../components/ApptCardRow';
 
 type ScreenList = {
@@ -35,13 +39,13 @@ const DashboardScreen: React.FC = () => {
   //States
   const [userProfile, setUserProfile] = useState<any>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [todayDatem, setTodayDate] = useState<Date>(new Date());
   const [isLoading, setIsLoading] = useState(false);
 
   //Variables
   const theme = useTheme(); // use the theme hook
   const navigation = useNavigation<NavigationProp<ScreenList>>();
-
-  //Handlers
+  const isFocused = useIsFocused();
 
   //Logout Handler
   const handleLogout = async () => {
@@ -60,35 +64,26 @@ const DashboardScreen: React.FC = () => {
         `http://10.0.2.2:5000/appointment/user/${userId}`,
       );
       if (response.status === 200) {
-        const filteredAppointments = response.data.filter(
-          (appointment: Appointment) => {
-            const apptDateRaw = new Date(appointment.appointment_date);
-            const todayDateRaw = new Date();
+        const appointments = response.data;
+        const today = new Date();
+        setTodayDate(today);
 
-            // Set both to be same GMT time cause Date() doesnt return the correct timezone
-            apptDateRaw.setUTCHours(apptDateRaw.getUTCHours() + 8);
-            todayDateRaw.setUTCHours(todayDateRaw.getUTCHours() + 8);
+        const todayAppointments = appointments.filter((appointment: any) => {
+          const appointmentDate = new Date(appointment.appointment_date);
 
-            // Force comparison because couldn't get isSameDay to work :P
-            const appointmentDateFormatted = apptDateRaw
-              .toISOString()
-              .split('T')[0];
-            const todayDateFormatted = todayDateRaw.toISOString().split('T')[0];
-            return appointmentDateFormatted === todayDateFormatted; // T/F
-            // isSameDay(
-            //   parse(
-            //     appointment.appointment_date,
-            //     "EEE dd MMM yyyy HH:mm:ss 'GMT'",
-            //     new Date(),
-            //   ),
-            //   today),
-            // );
-            console.log('\nToday', appointmentDateFormatted);
-            console.log('ApptDate', todayDateFormatted);
-            console.log(appointmentDateFormatted === todayDateFormatted, '\n');
-          },
-        );
-        setAppointments(filteredAppointments);
+          // Compare the appointment date with today's date
+          return isSameDay(appointmentDate, today);
+        });
+
+        console.log('Today:', today);
+        console.log("Today's Appointments:", todayAppointments);
+
+        // console log appt time
+        // todayAppointments.forEach((appt: any) => {
+        //   console.log('appt time:', appt.appointment_time);
+        // });
+
+        setAppointments(todayAppointments);
       }
     } catch (error) {
       console.log(error);
@@ -122,12 +117,11 @@ const DashboardScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (userProfile) {
+    if (isFocused && userProfile) {
       fetchAppointments(userProfile.user_id);
       AsyncStorage.setItem('userProfileID', userProfile.user_id.toString()); // Stored locally to use in appt screen
     }
-  }, [userProfile]);
-
+  }, [isFocused, userProfile]);
   return (
     <>
       <SafeAreaView
@@ -168,10 +162,21 @@ const DashboardScreen: React.FC = () => {
                 appointments.map(appointment => (
                   <View
                     key={appointment.appointment_id}
-                    style={{
-                      ...styles.cardContainer,
-                      backgroundColor: theme.colors.surface,
-                    }}
+                    style={
+                      appointment.appointment_time >
+                      todayDatem.getHours() * 3600 +
+                        todayDatem.getMinutes() * 60
+                        ? // AFter current time
+                          {
+                            ...styles.cardContainerToday,
+                            backgroundColor: theme.dark ? '#320B0B' : '#F8DEDE',
+                          }
+                        : //Before current time
+                          {
+                            ...styles.cardContainer,
+                            backgroundColor: theme.colors.surface,
+                          }
+                    }
                   >
                     <ApptCardRow appt={[appointment]} />
                   </View>
@@ -213,6 +218,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderLeftWidth: 5,
     borderLeftColor: colors.primary,
+  },
+
+  cardContainerToday: {
+    borderRadius: 15,
+    elevation: 5,
+    padding: 10,
+    marginBottom: 20,
+    borderColor: '#C52E2E',
+    borderWidth: 8,
   },
 
   cardText: {

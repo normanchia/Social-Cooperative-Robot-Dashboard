@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,17 @@ import {
 } from 'react-native';
 
 import { mainContainer, colors } from '../styles/styles';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import {
+  useNavigation,
+  NavigationProp,
+  useIsFocused,
+} from '@react-navigation/native';
 import { useTheme } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from 'jwt-decode';
 import axios from 'axios';
 import { showToast } from '../util/action';
+import ApptDialog from '../components/ApptDialog';
 
 type ScreenList = {
   DashboardScreen: undefined;
@@ -29,8 +34,22 @@ interface DecodedToken {
 const LoginScreen: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
+  const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProp<ScreenList>>();
   const theme = useTheme();
+
+  // Check timezone
+  const checkTimeZone = () => {
+    const today = new Date();
+    today.getTimezoneOffset() !== -480
+      ? setIsDialogVisible(true)
+      : setIsDialogVisible(false);
+  };
+
+  useEffect(() => {
+    checkTimeZone();
+  }, [isFocused]);
 
   const handleLogin = async () => {
     try {
@@ -130,6 +149,14 @@ const LoginScreen: React.FC = () => {
             </Text>
           </TouchableOpacity>
         </View>
+        {/* Dialogbox */}
+        {isDialogVisible && (
+          <ApptDialog
+            appt={null}
+            btnMessage={'Change Timezone'}
+            onClose={() => checkTimeZone()}
+          />
+        )}
       </SafeAreaView>
     </>
   );

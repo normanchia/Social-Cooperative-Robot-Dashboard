@@ -1,20 +1,19 @@
 // Docs on dropdown picker: https://hossein-zare.github.io/react-native-dropdown-picker-website/docs/rules
 // Docs on dateTime picker: https://github.com/henninghall/react-native-date-picker#example-1-modal
 
-import React, { Children, useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   SafeAreaView,
   TouchableOpacity,
   StyleSheet,
-  Button,
-  TouchableHighlight,
   TextInput,
   ScrollView,
+  Keyboard,
 } from 'react-native';
 
-import { mainContainer, bodyContainer, colors } from '../styles/styles';
+import { mainContainer, colors } from '../styles/styles';
 import Header from '../components/Header';
 import {
   NavigationProp,
@@ -22,20 +21,18 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import DropDownPicker, {
-  DropDownPickerProps,
-} from 'react-native-dropdown-picker';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { showToast } from '../util/action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { RelaxView } from '../introduction_animation/scenes';
 import DatePicker from 'react-native-date-picker';
-import { FullWindowOverlay } from 'react-native-screens';
 import { useTheme } from 'react-native-paper';
-import { formatISO, isDate, parse } from 'date-fns';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import isBefore from 'date-fns/isBefore';
+import LoadingIndicator from '../components/LoadingIndicator';
+import ApptDialog from '../components/ApptDialog';
 
-interface Appointment {
+interface IAppointment {
   appointment_id: number;
   hospital_id: number;
   hospital_name: string;
@@ -49,15 +46,33 @@ const AddAppointmentScreen: React.FC = () => {
   //    Seeing which page it came from    //
   const route = useRoute();
   const { appointment, screenIntent } = route.params as {
-    appointment: Appointment;
+    appointment: IAppointment;
     screenIntent: String;
   };
   const [isIntentEdit, setIsIntentEdit] = useState(false);
   const [isIntentAdd, setIsIntentAdd] = useState(false);
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [userID, setUserID] = useState(0);
 
-  const getTodayDate = () => {
-    const today = new Date();
+  //    Keyboard focus    //
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const hide = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+  //    Date Time stuff    //
+  const localTimeNow = new Date();
+  const getandSetTodayDate = () => {
     const weekdayList = [
       'Sunday',
       'Monday',
@@ -67,24 +82,20 @@ const AddAppointmentScreen: React.FC = () => {
       'Friday',
       'Saturday',
     ];
+    setDateTimeNOW(localTimeNow); // Used in <DatePicker> component as min date
 
-    const timezoneOffset = today.getTimezoneOffset(); // Current offset in minutes
-    const durationInMinutes = 60; // It's getting GMT7, we live in GMT8 LOL
-    const newOffset = timezoneOffset + durationInMinutes;
-    const adjustedToday = new Date(today.getTime() + newOffset * 60 * 1000);
-    setDateTimeNOW(adjustedToday);
-    // setDate(adjustedToday); // set the dateTime as NOW
-
-    const weekday = weekdayList[adjustedToday.getUTCDay()];
-    const day = adjustedToday.getUTCDate();
-    const month = formatMMM(adjustedToday.getUTCMonth());
-    const year = adjustedToday.getUTCFullYear();
+    const weekday = weekdayList[localTimeNow.getDay()];
+    const day = localTimeNow.getDate();
+    const month = formatMMM(localTimeNow.getMonth());
+    const year = localTimeNow.getFullYear();
 
     // Setting the respective values
     setWeekday(weekday);
     setDay(`${day}`);
     setMonth(month);
     setYear(`${year}`);
+
+    // console.log(`Today is ${weekday}, ${day} ${month} ${year}`);
   };
 
   //  Change states based on which page it came from
@@ -96,15 +107,16 @@ const AddAppointmentScreen: React.FC = () => {
       }
     });
 
-    // Force date to be today to prevent error
-    getTodayDate();
+    // Force date to be today to prevent undefined date error
+    getandSetTodayDate();
 
     // If came from editAppointment screen
     if (screenIntent === 'editAppointment') {
       // Edit appointment
-      setIsIntentEdit(true);
+      setIsIntentEdit(true); // Customization & logic
       setHeaderValue('Edit Appointment'); // Header
       setTitleValue(appointment?.appointment_title); // Title
+      setValueLocation(`${appointment.hospital_id}`); // Location
       setNotesValue(appointment?.additional_note); // Notes
       setButtonValue('Update!'); // Button
 
@@ -134,6 +146,7 @@ const AddAppointmentScreen: React.FC = () => {
       // Setting Time to display
       setIsTimeVisible(true);
       setDisplayTime(`${appointment?.appointment_time}`);
+      console.debug('line 149', appointment.appointment_time);
       if (
         weekdayWordOnly &&
         dayEdit &&
@@ -149,13 +162,13 @@ const AddAppointmentScreen: React.FC = () => {
           `${appointment?.appointment_time}`,
         );
       }
-
-      // Location
-      setValueLocation(`${appointment.hospital_id}`);
     } else {
-      // screenIntent = 'addAppointment' from AppointmentScreen
-      // For the moment this else is only Add Appointment so nth special
-      setIsIntentAdd(true);
+      // else screenIntent = 'addAppointment' from AppointmentScreen
+      setDisplayTime(
+        // Set display time to be ahead of now by 4 minutes so time card will display next 5 min interval instead of past
+        formatTime(localTimeNow.getHours(), localTimeNow.getMinutes() + 4),
+      );
+      setIsIntentAdd(true); // Customization and logic
     }
   }, []);
 
@@ -186,57 +199,21 @@ const AddAppointmentScreen: React.FC = () => {
       hours24 = hours === '12' ? '12' : parseInt(hours) + 12; // if 12PM, dont need change, else add 12 for 24HR(1pm -> 1300)
     }
 
-    // Storing date time ==> Don't forget to isoDate.toISOString() before sending to server ya?!!!!!!
+    // Final formatting before sending to DB
     const isoDate = new Date(
       `${day}, ${dd} ${mmm} ${yyyy} ${hours24}:${minutes}:00`,
     );
-    setDate(isoDate);
+    const timeServerSend = `${hours24}:${minutes}:00`;
+    const dateServerSend = `${yyyy}-${isoDate.getMonth() + 1}-${dd}`; // YYYY-mm-dd
 
-    // Updating state for use in DB
-    const ssms = parseInt(hours24.toString()) * 3600 + parseInt(minutes) * 60;
-    setSecondsSinceMidnightServer(ssms);
-    const tmpDateObj = new Date(ssms * 1000);
-    const timeServerSend = tmpDateObj.toLocaleTimeString('en-US', {
-      timeZone: 'UTC',
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
+    setDate(isoDate); // Setting frontend to be the same
 
     // Setting backend to be the same
     setTimeServer(timeServerSend.toString());
-    setDateServer(formatISODateToServerDate(isoDate)); //YYYY-mm-dd
-  };
-
-  //    Navigation and updating DB  //
-  const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  const [secondsSinceMidnightServer, setSecondsSinceMidnightServer] =
-    useState<number>();
-  const [timeServer, setTimeServer] = useState<string>();
-  const [dateServer, setDateServer] = useState<string>();
-  const extractData = () => {
-    printToast('');
-
-    const appointmentData = {
-      hospital_id: valueLoc,
-      user_id: userID,
-      reminder_time: timeServer, //   ========== CHANGE REMINDER_TIME ==========
-      reminder_date: dateServer, //   ========== CHANGE REMINDER_DATE ==========
-      appointment_time: timeServer,
-      appointment_date: dateServer,
-      additional_note: notesValue,
-      appointment_title: titleValue,
-    };
-    console.debug('line 196 Appt info:', appointmentData, '\n');
-    return appointmentData;
-    // navigation.navigate('AppointmentScreen', null); // Navigate back
+    setDateServer(dateServerSend); //YYYY-mm-dd
   };
 
   //   Formatting     //
-  const formatISODateToServerDate = (isoDate: Date) => {
-    return isoDate.toISOString().split('T')[0]; // 2023-06-16T18:05:00.000Z ===> 2023-06-16
-  };
   const formatDD = (dm: number) => {
     return dm < 10 ? `0${dm}` : dm.toString();
   };
@@ -257,6 +234,34 @@ const AddAppointmentScreen: React.FC = () => {
     ];
     return months[monthNo];
   };
+  const formatTime = (hours: number, min: number) => {
+    const amOrPm = hours >= 12 ? 'PM' : 'AM';
+    const hours12 = hours % 12 || 12;
+    const minStr = min < 10 ? `0${min}` : min;
+    return `${hours12}:${minStr} ${amOrPm}`;
+  };
+
+  //   Loading Indicators   //
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  //    Navigation and updating DB  //
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  const [timeServer, setTimeServer] = useState<string>();
+  const [dateServer, setDateServer] = useState<string>();
+  const extractData = () => {
+    const appointmentData = {
+      hospital_id: valueLoc,
+      user_id: userID,
+      reminder_time: timeServer, //   ========== CHANGE REMINDER_TIME ==========
+      reminder_date: dateServer, //   ========== CHANGE REMINDER_DATE ==========
+      appointment_time: timeServer,
+      appointment_date: dateServer,
+      additional_note: notesValue,
+      appointment_title: titleValue,
+    };
+    console.debug('line 241 Appt info:', appointmentData, '\n');
+    return appointmentData;
+  };
 
   //   Update database    //
   const updateDatabase = async (apptID: number, apptData: any) => {
@@ -268,7 +273,7 @@ const AddAppointmentScreen: React.FC = () => {
       );
       if (response.status === 200) {
         showToast('✅ Successfully updated');
-        // navigation.navigate('AppointmentScreen', { forceRefresh: 'fromAppt' }); // Navigate back
+        setIsLoading(false);
         navigation.goBack();
       } else {
         showToast('Error updating appointment, please try again later.');
@@ -287,7 +292,7 @@ const AddAppointmentScreen: React.FC = () => {
         { headers: { 'Content-Type': 'application/json' } },
       );
       if (response.status === 200) {
-        console.log('NEW APPT CREATED??!!');
+        setIsLoading(false);
         navigation.goBack();
       } else {
         console.log('sadge');
@@ -305,6 +310,7 @@ const AddAppointmentScreen: React.FC = () => {
       );
       if (response.status === 200) {
         showToast('Appointment deleted!');
+        setIsLoading(false);
         navigation.goBack();
       } else {
         showToast('Error deleting appointment, please try again later.');
@@ -337,27 +343,18 @@ const AddAppointmentScreen: React.FC = () => {
   const [openTime, setOpenTime] = useState(false);
   const [dateButtonTitle, setDateButtonTitle] = useState('Add Date');
   const [timeButtonTitle, setTimeButtonTitle] = useState('Add Time');
-  const [dateTimeSelectorColor, setDateTimeSelectorColor] = useState(
-    'backgroundColor: colors.primary',
-  );
 
   //    For displaying date/ time  //
   const [isDateVisible, setIsDateVisible] = useState(false);
   const [isTimeVisible, setIsTimeVisible] = useState(false);
-  const [time, setDisplayTime] = useState('00:00 AM');
+  const [displayTime, setDisplayTime] = useState('01:00 AM');
   const [weekday, setWeekday] = useState('');
   const [day, setDay] = useState('');
   const [month, setMonth] = useState('');
   const [year, setYear] = useState('');
 
   //    For notes   //
-  const [isNotesFocused, setIsNotesFocused] = useState(false);
   const [notesValue, setNotesValue] = useState('');
-
-  //    For debug   //
-  const printToast = (message: string) => {
-    // showToast('🅰️' + titleValue + '🏠' + valueLoc + '📅' + dateTime);
-  };
 
   //    Theme stuff //
   const theme = useTheme();
@@ -377,6 +374,7 @@ const AddAppointmentScreen: React.FC = () => {
       color: theme.colors.secondary,
     },
     weekdayText: {
+      color: theme.colors.secondary,
       textAlign: 'center',
       fontSize: 22,
     },
@@ -398,6 +396,7 @@ const AddAppointmentScreen: React.FC = () => {
     yearText: {
       textAlign: 'center',
       fontSize: 22,
+      color: theme.colors.secondary,
     },
     dateTimeCardContainer: {
       flex: 5,
@@ -482,10 +481,20 @@ const AddAppointmentScreen: React.FC = () => {
       fontSize: 16,
       fontWeight: 'bold',
     },
+    activityIndicator: {
+      backgroundColor: theme.colors.backdrop,
+      position: 'absolute',
+      bottom: 0,
+      top: 0,
+      right: 0,
+      left: 0,
+      zIndex: 9998,
+    },
   });
 
   return (
     <>
+      {isLoading && <LoadingIndicator />}
       <SafeAreaView
         style={[
           mainContainer.container,
@@ -495,10 +504,11 @@ const AddAppointmentScreen: React.FC = () => {
         {/* Header */}
         <Header headerText={headerValue} />
         {/* Delete appointment button */}
-        {screenIntent === 'editAppointment' && (
+        {isIntentEdit && (
           <TouchableOpacity
             onPress={() => {
-              deleteAppointmentDatabase(appointment.appointment_id);
+              setIsDialogVisible(true);
+              setIsLoading(true);
             }}
           >
             <Text style={[styles.deleteApptBtn]}>
@@ -506,6 +516,17 @@ const AddAppointmentScreen: React.FC = () => {
               {'\u00A0'} Delete{' '}
             </Text>
           </TouchableOpacity>
+        )}
+        {/* Dialogbox */}
+        {isDialogVisible && (
+          <ApptDialog
+            appt={appointment}
+            btnMessage={'Delete Appointment'}
+            onClose={() => {
+              setIsLoading(false);
+              setIsDialogVisible(false);
+            }}
+          />
         )}
 
         {/* Main Content */}
@@ -532,8 +553,6 @@ const AddAppointmentScreen: React.FC = () => {
               textAlignVertical="top" // so ios and android same behavior
               maxLength={30} // 30 characters per line
               returnKeyType="done"
-              onFocus={() => setIsNotesFocused(true)}
-              onBlur={() => setIsNotesFocused(false)}
               onChangeText={text => setTitleValue(text)}
               value={titleValue}
             />
@@ -610,7 +629,6 @@ const AddAppointmentScreen: React.FC = () => {
                   onConfirm={date => {
                     setOpenDate(false);
                     setDate(date);
-                    // const dateString = date.toDateString();   // For date - unused atm
                     const fullDateTime = date.toLocaleString('en-US', {
                       weekday: 'long',
                     });
@@ -631,9 +649,14 @@ const AddAppointmentScreen: React.FC = () => {
                     setMonth(month);
                     setYear(year);
                     setIsDateVisible(true);
+                    console.debug(
+                      'Line 684 date card:',
+                      fullDateTime,
+                      displayTime,
+                    );
 
                     // Update data for sending
-                    updateDateTime(weekday, day, month, year, time);
+                    updateDateTime(weekday, day, month, year, displayTime);
                   }}
                   onCancel={() => {
                     setOpenDate(false);
@@ -658,7 +681,7 @@ const AddAppointmentScreen: React.FC = () => {
                 )}
                 {isTimeVisible && (
                   <View style={styles.flexAlignMiddle}>
-                    <Text style={styles.timeText}>{time}</Text>
+                    <Text style={styles.timeText}>{displayTime}</Text>
                   </View>
                 )}
 
@@ -705,8 +728,6 @@ const AddAppointmentScreen: React.FC = () => {
               maxLength={40} // 40 characters per line
               numberOfLines={3} // max 3 lines
               returnKeyType="done"
-              onFocus={() => setIsNotesFocused(true)}
-              onBlur={() => setIsNotesFocused(false)}
               onChangeText={text => setNotesValue(text)}
               value={notesValue}
             />
@@ -714,19 +735,26 @@ const AddAppointmentScreen: React.FC = () => {
         </ScrollView>
 
         {/* Final submit button */}
-        {!isNotesFocused && (
+        {!isKeyboardVisible && (
           <TouchableOpacity
             onPress={() => {
-              if (screenIntent === 'editAppointment') {
-                updateDatabase(appointment.appointment_id, extractData());
-              } else if (screenIntent === 'addAppointment') {
-                // Validation
-                if (isTimeVisible && isDateVisible && valueLoc !== null) {
-                  createAppointmentDatabase(extractData());
-                } else {
-                  showToast(
-                    '❗Please ensure date, time and hospitals are selected.',
-                  );
+              // Date and time validation
+              if (dateTimeNOW && isBefore(dateTime, dateTimeNOW)) {
+                showToast('Please select a future date and time, not past.');
+              } else {
+                setIsLoading(true); // Start loading animation
+                // Intent check
+                if (isIntentEdit) {
+                  updateDatabase(appointment.appointment_id, extractData());
+                } else if (isIntentAdd) {
+                  if (isTimeVisible && isDateVisible && valueLoc !== null) {
+                    createAppointmentDatabase(extractData());
+                  } else {
+                    setIsLoading(false);
+                    showToast(
+                      '❗Please ensure date, time and hospitals are selected.',
+                    );
+                  }
                 }
               }
             }}
