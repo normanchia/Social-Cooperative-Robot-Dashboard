@@ -149,7 +149,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
           <View style={styles.buttonContainer}>
           <Text style={{ color: theme.colors.secondary }}>Select Time</Text>
           <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-            <Text>{date.toLocaleTimeString()}</Text>
+            <Text style={{ color: theme.colors.secondary }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} </Text>
           </TouchableOpacity>
           {showDatePicker && (
             <View>
@@ -160,8 +160,15 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
                 minimumDate={new Date(Date.now())} // Set minimum date to now
                 maximumDate={new Date(Date.now() + 24*60*60*1000)} // Set maximum date to 24 hours from now    
                 style={{ backgroundColor: theme.colors.background, width: 200 }}
+                textColor={theme.colors.secondary}
               />
-              <Button title="OK" onPress={() => setShowDatePicker(false)} />
+              <TouchableOpacity
+              style={{ ...styles.button, backgroundColor: theme.colors.background }}
+              onPress={() => setShowDatePicker(false)}>    
+              <Text style={{ ...styles.buttonText, color: theme.colors.secondary }}>
+                Select Time
+              </Text>    
+              </TouchableOpacity>
             </View>
           )}
             <TouchableOpacity
