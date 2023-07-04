@@ -9,6 +9,7 @@ export const CustomLightTheme = {
     background: '#ffffff', //Background Color
     secondary: '#222222', //Text Color
     surface: '#ebebeb', //Card Color
+    complete: '#4CAF50',
   },
 };
 
@@ -21,5 +22,6 @@ export const CustomDarkTheme = {
     background: '#222222', //Background Color
     secondary: '#ffffff', //Text Color
     surface: '#2b2b2b', //Card Color
+    complete: '#8BC34A',
   },
 };

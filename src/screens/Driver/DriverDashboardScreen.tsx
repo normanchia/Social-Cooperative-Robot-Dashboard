@@ -428,7 +428,7 @@ const DriverDashboardScreen: React.FC = () => {
                       color: theme.colors.secondary,
                     }}
                   >
-                    Incomming Requests
+                    Incoming Requests
                   </Text>
                 </View>
               </View>

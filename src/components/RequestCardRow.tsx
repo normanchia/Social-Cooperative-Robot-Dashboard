@@ -61,7 +61,7 @@ const RequestCardRow: React.FC<RequestCardRowProps> = ({
             <TouchableOpacity
               style={[
                 styles.cardBtn,
-                { backgroundColor: theme.colors.primary },
+                { backgroundColor: theme.colors.complete },
               ]}
               onPress={() => {
                 completeHandler(item);
