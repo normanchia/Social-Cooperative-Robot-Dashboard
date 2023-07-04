@@ -53,7 +53,7 @@ const LoginScreen: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://10.0.2.2:5000/login', {
+      const response = await axios.post('https://itp3111.as.r.appspot.com/login', {
         username,
         password,
       });

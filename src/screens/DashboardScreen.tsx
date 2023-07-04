@@ -61,7 +61,7 @@ const DashboardScreen: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `http://10.0.2.2:5000/appointment/user/${userId}`,
+        `https://itp3111.as.r.appspot.com/appointment/user/${userId}`,
       );
       if (response.status === 200) {
         const appointments = response.data;
@@ -103,7 +103,7 @@ const DashboardScreen: React.FC = () => {
         ] = `Bearer ${accessToken}`;
 
         // Make a GET request to the '/profile' route
-        const response = await axios.get('http://10.0.2.2:5000/profile');
+        const response = await axios.get('https://itp3111.as.r.appspot.com/profile');
         setUserProfile(response.data);
       }
     } catch (error) {

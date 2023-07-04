@@ -30,7 +30,7 @@ const RegisterScreen: React.FC = () => {
 
   const handleRegister = async () => {
     try {
-      const response = await axios.post('http://10.0.2.2:5000/user', {
+      const response = await axios.post('https://itp3111.as.r.appspot.com/user', {
         username,
         password,
         address,

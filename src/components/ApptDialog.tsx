@@ -48,7 +48,7 @@ const ApptDialog: React.FC<ApptDialogProps> = ({
   const deleteAppointmentDatabase = async (apptID: number) => {
     try {
       const response = await axios.delete(
-        `http://10.0.2.2:5000/appointment/${apptID}`,
+        `https://itp3111.as.r.appspot.com/appointment/${apptID}`,
       );
       if (response.status === 200) {
         showToast('Appointment deleted!');

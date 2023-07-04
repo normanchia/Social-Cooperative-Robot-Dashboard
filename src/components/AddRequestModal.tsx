@@ -74,7 +74,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
         try {
           // Call the new endpoint to get the list of robots at the station
           const robotResponse = await axios.get(
-            `http://10.0.2.2:5000/robot/station/${selectedStation.station_id}/status/1`
+            `https://itp3111.as.r.appspot.com/robot/station/${selectedStation.station_id}/status/1`
           );
           const robots = robotResponse.data;
 
@@ -89,7 +89,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
           console.log(date.getTime())
           // Post the robot request
           const response = await axios.post(
-            "http://10.0.2.2:5000/robot_request",
+            "https://itp3111.as.r.appspot.com/robot_request",
             {
               user_id: userID,
               robot_id: robotId,

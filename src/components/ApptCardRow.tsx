@@ -57,7 +57,7 @@ const ApptCardRow: React.FC<ApptCardRowProps> = ({ appt }) => {
     const getHospitalData = async () => {
       try {
         const response = await axios.get(
-          `http://10.0.2.2:5000/hospital/${appt[0].hospital_id}`,
+          `https://itp3111.as.r.appspot.com/hospital/${appt[0].hospital_id}`,
         );
         if (response.status === 200) {
           setHospitalData(response.data);

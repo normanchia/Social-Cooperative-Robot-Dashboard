@@ -48,7 +48,7 @@ const CallScreen: React.FC = () => {
 
   // Get: All Station
   const fetchStations = async () => {
-    const response = await axios.get(`http://10.0.2.2:5000/robotstations`);
+    const response = await axios.get(`https://itp3111.as.r.appspot.com/appspot.com/robotstations`);
     if (response.status === 200) {
       setStations(response.data);
     }
@@ -57,7 +57,7 @@ const CallScreen: React.FC = () => {
   // Get: Existing Request
   const fetchRequests = async (userId: number) => {
     const response = await axios.get(
-      `http://10.0.2.2:5000/robot_request/user/${userId}/status_notIn/0,4`,
+      `https://itp3111.as.r.appspot.com/appspot.com/robot_request/user/${userId}/status_notIn/0,4`,
     );
     if (response.status === 200) {
       setRequests(response.data);
@@ -69,7 +69,7 @@ const CallScreen: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await axios.put(
-        `http://10.0.2.2:5000/robot_request/${request.request_id}`,
+        `https://itp3111.as.r.appspot.com/appspot.com/robot_request/${request.request_id}`,
         {
           request_status: 0, //close the robot request
         }
@@ -85,7 +85,7 @@ const CallScreen: React.FC = () => {
 
         // Call the robot/station API endpoint
         const updateRobotStationResponse = await axios.put(
-          `http://10.0.2.2:5000/robot/${request.robot_id}/station/${request.destination_station_id}`
+          `https://itp3111.as.r.appspot.com/appspot.com/robot/${request.robot_id}/station/${request.destination_station_id}`
         ); //update the robot parked location in sql
         if (updateRobotStationResponse.status === 200) {
           console.log("Robot and station updated successfully.");
@@ -95,7 +95,7 @@ const CallScreen: React.FC = () => {
 
         // Call the update_slots API endpoint
         const updateSlotsResponse = await axios.put(
-          `http://10.0.2.2:5000/update_slots`
+          `https://itp3111.as.r.appspot.com/appspot.com/update_slots`
         );
         if (updateSlotsResponse.status === 200) {
           console.log("Slots updated successfully.");
