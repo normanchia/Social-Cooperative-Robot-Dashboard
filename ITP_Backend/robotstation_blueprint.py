@@ -17,7 +17,7 @@ def get_robotstation(station_id):
     station = RobotStation.query.get(station_id)
     if station:
         return jsonify({'station_name': station.station_name, 'station_location': station.station_location,
-                        'slot_available': station.slot_available},total_slot=data['total_slot'])
+                        'slot_available': station.slot_available,'total_slot': station.total_slot})
     else:
         return jsonify({'message': 'Robot station not found!'}), 404
 
