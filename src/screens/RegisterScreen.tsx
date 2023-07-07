@@ -29,13 +29,21 @@ const RegisterScreen: React.FC = () => {
   const theme = useTheme();
 
   const handleRegister = async () => {
+    // Check if username and password are empty
+    if (username === '' || password === '' || address === '') {
+      showToast('Please enter username, password and address');
+      return;
+    }
     try {
-      const response = await axios.post('https://itp3111.as.r.appspot.com/user', {
-        username,
-        password,
-        address,
-        role_id: role === 'User' ? 2 : 3, // Set the role_id based on the selected role
-      });
+      const response = await axios.post(
+        'https://itp3111.as.r.appspot.com/user',
+        {
+          username,
+          password,
+          address,
+          role_id: role === 'User' ? 2 : 3, // Set the role_id based on the selected role
+        },
+      );
 
       if (response.status === 200) {
         showToast('New user created!');
