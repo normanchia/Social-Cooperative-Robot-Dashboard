@@ -9,7 +9,7 @@ class Role(db.Model):
     role_type = db.Column(db.String(50), nullable=False)
 
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'user_app'
     user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
