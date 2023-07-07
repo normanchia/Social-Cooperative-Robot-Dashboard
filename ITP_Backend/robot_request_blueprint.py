@@ -14,7 +14,6 @@ def create_robot_request():
     if robot:
         # Update the robot status to 0
         robot.robot_status = 0
-        db.session.commit()
 
         # Convert the timestamp from milliseconds to a Python datetime object
         request_time = datetime.fromtimestamp(data['request_time'] / 1000.0)
