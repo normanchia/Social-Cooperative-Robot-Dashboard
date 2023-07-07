@@ -4,10 +4,12 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class Role(db.Model):
+    __tablename__ = 'role'
     role_id = db.Column(db.Integer, primary_key=True)
     role_type = db.Column(db.String(50), nullable=False)
 
 class User(db.Model):
+    __tablename__ = 'user'
     user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
@@ -15,11 +17,13 @@ class User(db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('role.role_id'), nullable=False)
 
 class Hospital(db.Model):
+    __tablename__ = 'hospital'
     hospital_id = db.Column(db.Integer, primary_key=True)
     postal_code = db.Column(db.String(10), nullable=False)
     hospital_name = db.Column(db.String(100), nullable=False)
 
 class Appointment(db.Model):
+    __tablename__ = 'appointment'
     appointment_id = db.Column(db.Integer, primary_key=True)
     hospital_id = db.Column(db.Integer, db.ForeignKey('hospital.hospital_id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
@@ -32,7 +36,6 @@ class Appointment(db.Model):
 
 class RobotStation(db.Model):
     __tablename__ = 'robot_station'
-
     station_id = db.Column(db.Integer, primary_key=True)
     station_name = db.Column(db.String(255))
     station_location = db.Column(db.String(255))
@@ -45,6 +48,7 @@ class RobotStation(db.Model):
 
 
 class Robot(db.Model):
+    __tablename__ = 'robot'
     robot_id = db.Column(db.Integer, primary_key=True)
     robot_name = db.Column(db.String(128))
     robot_status = db.Column(db.Integer)
@@ -52,7 +56,6 @@ class Robot(db.Model):
 
 class Robot_Request(db.Model):
     __tablename__ = 'robot_request'
-
     request_id = db.Column(db.Integer, primary_key=True)
     request_status = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
@@ -68,7 +71,6 @@ class Robot_Request(db.Model):
 
 class Driver_Request(db.Model):
     __tablename__ = 'driver_request'
-
     request_id = db.Column(db.Integer, primary_key=True)
     request_status = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
