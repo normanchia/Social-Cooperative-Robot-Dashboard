@@ -65,7 +65,7 @@ const AppointmentScreen: React.FC = () => {
   const fetchHospitalNames = async (hospitalId: number) => {
     try {
       const response = await axios.get(
-        `https://itp3111.as.r.appspot.com/hospital/${hospitalId}`,
+        `http://10.0.2.2:8080/hospital/${hospitalId}`,
       );
       if (response.status === 200) {
         const { hospital_name } = response.data;
@@ -103,7 +103,7 @@ const AppointmentScreen: React.FC = () => {
     // convert appt_date to Date object
     try {
       const response = await axios.get(
-        `https://itp3111.as.r.appspot.com/appointment/user/${userId}`,
+        `http://10.0.2.2:8080/appointment/user/${userId}`,
       );
       if (response.status === 200) {
         const allAppointments = response.data;

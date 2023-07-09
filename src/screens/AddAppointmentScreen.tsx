@@ -267,7 +267,7 @@ const AddAppointmentScreen: React.FC = () => {
   const updateDatabase = async (apptID: number, apptData: any) => {
     try {
       const response = await axios.put(
-        `https://itp3111.as.r.appspot.com/appointment/${apptID}`,
+        `http://10.0.2.2:8080/appointment/${apptID}`,
         JSON.stringify(apptData),
         { headers: { 'Content-Type': 'application/json' } },
       );
@@ -287,7 +287,7 @@ const AddAppointmentScreen: React.FC = () => {
   const createAppointmentDatabase = async (apptData: any) => {
     try {
       const response = await axios.post(
-        `https://itp3111.as.r.appspot.com/appointment`,
+        `http://10.0.2.2:8080/appointment`,
         JSON.stringify(apptData),
         { headers: { 'Content-Type': 'application/json' } },
       );
@@ -308,7 +308,7 @@ const AddAppointmentScreen: React.FC = () => {
   const deleteAppointmentDatabase = async (apptID: number) => {
     try {
       const response = await axios.delete(
-        `https://itp3111.as.r.appspot.com/appointment/${apptID}`,
+        `http://10.0.2.2:8080/appointment/${apptID}`,
       );
       if (response.status === 200) {
         showToast('Appointment deleted!');

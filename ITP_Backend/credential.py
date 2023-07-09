@@ -1,4 +1,4 @@
-host = '34.87.19.215'
+host = 'localhost'
 user = 'root'
-password = 'root'
+password = ''
 database = 'itp_team10_se'

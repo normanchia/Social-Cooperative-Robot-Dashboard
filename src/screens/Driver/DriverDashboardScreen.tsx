@@ -70,7 +70,7 @@ const DriverDashboardScreen: React.FC = () => {
         ] = `Bearer ${accessToken}`;
 
         // Make a GET request to the '/profile' route
-        const response = await axios.get('https://itp3111.as.r.appspot.com/profile');
+        const response = await axios.get('http://10.0.2.2:8080/profile');
         setUserProfile(response.data);
       }
     } catch (error) {
@@ -81,7 +81,7 @@ const DriverDashboardScreen: React.FC = () => {
   //GET: Username from ID
   const getUsername = async (id: number) => {
     try {
-      const response = await axios.get('https://itp3111.as.r.appspot.com/user/' + id);
+      const response = await axios.get('http://10.0.2.2:8080/user/' + id);
       return response.data.username;
     } catch (error) {
       console.log(error);
@@ -109,7 +109,7 @@ const DriverDashboardScreen: React.FC = () => {
   const getStationID = async (address: string) => {
     try {
       const response = await axios.get(
-        'https://itp3111.as.r.appspot.com/robotstation/' + address,
+        'http://10.0.2.2:8080/robotstation/' + address,
       );
       setStationID(response.data.station_id);
     } catch (error) {
@@ -122,7 +122,7 @@ const DriverDashboardScreen: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `https://itp3111.as.r.appspot.com/robot_request/station/${stationID}/status/0`,
+        `http://10.0.2.2:8080/robot_request/station/${stationID}/status/0`,
       );
       setStationRequests(response.data);
       setIsLoading(false);
@@ -141,7 +141,7 @@ const DriverDashboardScreen: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'https://itp3111.as.r.appspot.com/driver_request',
+        'http://10.0.2.2:8080/driver_request',
         newDriverRequest,
       );
 
@@ -151,7 +151,7 @@ const DriverDashboardScreen: React.FC = () => {
       };
 
       const response2 = await axios.put(
-        `https://itp3111.as.r.appspot.com/robot_request/${requestID}`,
+        `http://10.0.2.2:8080/robot_request/${requestID}`,
         updatedRequest,
       );
 
@@ -170,7 +170,7 @@ const DriverDashboardScreen: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `https://itp3111.as.r.appspot.com/driver_request/driver/${userProfile?.user_id}`,
+        `http://10.0.2.2:8080/driver_request/driver/${userProfile?.user_id}`,
       );
       setDriverRequests(response.data);
       setIsLoading(false);
@@ -204,7 +204,7 @@ const DriverDashboardScreen: React.FC = () => {
           };
 
           const response = await axios.put(
-            `https://itp3111.as.r.appspot.com/driver_request/${requestID}`,
+            `http://10.0.2.2:8080/driver_request/${requestID}`,
             updatedRequest,
           );
 
@@ -242,7 +242,7 @@ const DriverDashboardScreen: React.FC = () => {
           };
 
           const response = await axios.put(
-            `https://itp3111.as.r.appspot.com/driver_request/${requestID}`,
+            `http://10.0.2.2:8080/driver_request/${requestID}`,
             updatedRequest,
           );
 
