@@ -1,7 +1,7 @@
 // Docs on dropdown picker: https://hossein-zare.github.io/react-native-dropdown-picker-website/docs/rules
 // Docs on dateTime picker: https://github.com/henninghall/react-native-date-picker#example-1-modal
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -299,6 +299,8 @@ const AddAppointmentScreen: React.FC = () => {
       }
     } catch (error) {
       console.log('Error creating appointment:', error);
+      setIsLoading(false);
+      showToast('Error creating appointment, please try again later.');
     }
   };
 
@@ -327,7 +329,11 @@ const AddAppointmentScreen: React.FC = () => {
 
   //   For Location Dropdown //
   const [openLoc, setOpenLocation] = useState(false); // controls the dropdown opening
+  const [openSpecificLoc, setOpenSpecificLocation] = useState(false); // controls the specifics loc dropdown opening
   const [valueLoc, setValueLocation] = useState<string | null>(null); // value of item selected
+  const [valueSpecificLoc, setValueSpecificLocation] = useState<string | null>(
+    null,
+  ); // value of item selected
   const [itemsLoc, setItemsLocation] = useState([
     { label: 'Singapore General Hospital', value: '1' },
     { label: 'National University Hospital', value: '2' },
@@ -335,6 +341,24 @@ const AddAppointmentScreen: React.FC = () => {
     { label: 'Tan Tock Seng Hospital', value: '4' },
     { label: 'Mount Elizabeth Hospital', value: '5' },
   ]);
+  const [itemsSpecificLoc, setItemsSpecificLocation] = useState([
+    { label: 'Main Lobby', value: 'Main Lobby' },
+    { label: 'A&E', value: 'A&E' },
+    { label: 'Tower A', value: 'Tower A' },
+    { label: 'Tower B', value: 'Tower B' },
+    { label: 'Dental Clinic', value: 'Dental Clinic' },
+    { label: 'Walk-in Clinic', value: 'Walk-in Clinic' },
+    { label: 'Pharmacy', value: 'Pharmacy' },
+  ]);
+  const onHospitalLocOpen = useCallback(() => {
+    setOpenSpecificLocation(false);
+  }, []);
+  const onSpecificLocOpen = useCallback(() => {
+    setOpenLocation(false);
+  }, []);
+  useEffect(() => {
+    valueSpecificLoc && setNotesValue(valueSpecificLoc.toString());
+  }, [valueSpecificLoc]);
 
   //    For datetime picker     //
   const [dateTimeNOW, setDateTimeNOW] = useState<Date>();
@@ -462,7 +486,6 @@ const AddAppointmentScreen: React.FC = () => {
 
     rowStyle: {
       flexDirection: 'row',
-      // marginTop: 10,
       alignContent: 'space-around',
       // borderWidth: 1,
       // borderColor: '#f1e',
@@ -557,33 +580,61 @@ const AddAppointmentScreen: React.FC = () => {
               value={titleValue}
             />
 
-            {/* Location dropdown */}
+            {/* Appt Location dropdown */}
             <Text style={[styles.sectionHeader, { marginTop: 0 }]}>
               Select appointment location
             </Text>
-            <View style={(styles.rowStyle, { zIndex: 9000, height: 60 })}>
+            <View style={(styles.rowStyle, { zIndex: 9000 })}>
               <View style={{ flex: 1 }}>
                 <DropDownPicker
                   placeholder={'🏥 Select hospital'}
                   placeholderStyle={styles.placeholderStyleCustom}
                   theme={dropDownTheme}
-                  dropDownContainerStyle={{}}
+                  dropDownContainerStyle={{ position: 'relative', top: 0 }}
                   selectedItemContainerStyle={{
-                    backgroundColor: theme.colors.primary,
+                    backgroundColor: '#BBDDD1',
                   }}
                   dropDownDirection="AUTO"
                   showTickIcon={true}
                   open={openLoc}
+                  onOpen={onHospitalLocOpen}
                   value={valueLoc}
                   items={itemsLoc}
                   setOpen={setOpenLocation}
                   setValue={setValueLocation}
                   setItems={setItemsLocation}
                   autoScroll={true}
-                  // listMode="MODAL" // For wholescreen
+                  // listMode="MODAL" => Whole screen | "SCROLLVIEW" => Dropdown
                   listMode="SCROLLVIEW"
+                  scrollViewProps={{ nestedScrollEnabled: true }}
                 />
               </View>
+              {valueLoc === '5' && (
+                <View style={(styles.rowStyle, { zIndex: -1, marginTop: 10 })}>
+                  <DropDownPicker
+                    placeholder={'🛋️ Select Pickup Point'}
+                    placeholderStyle={styles.placeholderStyleCustom}
+                    theme={dropDownTheme}
+                    dropDownContainerStyle={{ position: 'relative', top: 0 }}
+                    selectedItemContainerStyle={{
+                      backgroundColor: '#BBDDD1',
+                    }}
+                    dropDownDirection="AUTO"
+                    showTickIcon={true}
+                    open={openSpecificLoc}
+                    onOpen={onSpecificLocOpen}
+                    value={valueSpecificLoc}
+                    items={itemsSpecificLoc}
+                    setOpen={setOpenSpecificLocation}
+                    setValue={setValueSpecificLocation}
+                    setItems={setItemsSpecificLocation}
+                    autoScroll={true}
+                    // listMode="MODAL" => Whole screen | "SCROLLVIEW" => Dropdown
+                    listMode="SCROLLVIEW"
+                    scrollViewProps={{ nestedScrollEnabled: true }}
+                  />
+                </View>
+              )}
             </View>
 
             {/* Date and time Card */}
