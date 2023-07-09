@@ -22,6 +22,9 @@ const AccountHelpScreen: React.FC = () => {
           <Text style={{ ...styles.headerText, color: theme.colors.secondary }}>
             FAQ on Account Settings
           </Text>
+          <Text style={{ color: theme.colors.secondary }}>
+            Not Implemented
+          </Text>
         </View>
       </SafeAreaView>
     </>

@@ -167,7 +167,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
               style={{ ...styles.button, backgroundColor: theme.colors.background }}
               onPress={() => setShowDatePicker(false)}>    
               <Text style={{ ...styles.buttonText, color: theme.colors.secondary }}>
-                Select Time
+                Confirm Time
               </Text>    
               </TouchableOpacity>
             </View>
