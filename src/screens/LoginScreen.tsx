@@ -52,11 +52,20 @@ const LoginScreen: React.FC = () => {
   }, [isFocused]);
 
   const handleLogin = async () => {
+    // Check if username and password are empty
+    if (username === '' || password === '') {
+      showToast('Please enter username and password');
+      return;
+    }
+
     try {
-      const response = await axios.post('https://itp3111.as.r.appspot.com/login', {
-        username,
-        password,
-      });
+      const response = await axios.post(
+        'https://itp3111.as.r.appspot.com/login',
+        {
+          username,
+          password,
+        },
+      );
 
       if (response.status === 200) {
         const { access_token } = response.data;
