@@ -60,7 +60,7 @@ const LoginScreen: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'http://10.0.2.2:8080/login',
+        'https://itp3111.as.r.appspot.com/login',
         {
           username,
           password,
@@ -151,11 +151,12 @@ const LoginScreen: React.FC = () => {
               style={{
                 color: theme.colors.secondary,
                 marginTop: 20,
-                fontSize: 24,
+                fontSize: 22,
               }}
             >
-              Don't have an account? Register
-            </Text>
+              Don't have an account? 
+              <Text style={{textDecorationLine: 'underline'}}> Register Here</Text>
+            </Text> 
           </TouchableOpacity>
         </View>
         {/* Dialogbox */}
