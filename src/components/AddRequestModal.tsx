@@ -86,7 +86,6 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
 
           // Use the robot_id of the first robot in the list
           const robotId = robots[0].robot_id;
-          console.log(date.getTime())
           // Post the robot request
           const response = await axios.post(
             "https://itp3111.as.r.appspot.com/robot_request",
@@ -96,7 +95,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
               request_status: 1,
               pickup_station: selectedStation.station_id,
               destination_station: selectedDestination.station_id,
-              request_time: date.getTime(),
+              request_time: date.getTime() + 8 * 60 * 60 * 1000,
             }
           );
 
@@ -124,10 +123,10 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
     >
       <View style={styles.centeredView}>
         <View style={{ ...styles.modalView, backgroundColor: theme.colors.background }}>
-          <Text style={{ color: theme.colors.secondary }}>
-            Select Destination
-          </Text>
-          <View style={{ backgroundColor: theme.colors.background }}>
+          <View>
+            <Text style={{ color: theme.colors.secondary }}>
+              Select Destination
+            </Text>
             <Picker
               selectedValue={selectedDestinationId}
               onValueChange={(itemValue) =>
@@ -147,11 +146,11 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
               ))}
             </Picker>
           </View>
-          <View style={styles.buttonContainer}>
-          <Text style={{ color: theme.colors.secondary }}>Select Time</Text>
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-            <Text style={{ color: theme.colors.secondary }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} </Text>
-          </TouchableOpacity>
+          <View>
+            <Text style={{ color: theme.colors.secondary }}>Select Time</Text>
+            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+              <Text style={{ color: theme.colors.secondary }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} </Text>
+            </TouchableOpacity>
           {showDatePicker && (
             <View>
               <DatePicker
@@ -160,7 +159,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
                 mode="time"
                 minimumDate={new Date(Date.now())} // Set minimum date to now
                 maximumDate={new Date(Date.now() + 24*60*60*1000)} // Set maximum date to 24 hours from now    
-                style={{ backgroundColor: theme.colors.background, width: 200 }}
+                style={{ backgroundColor: theme.colors.background }}
                 textColor={theme.colors.secondary}
               />
               <TouchableOpacity

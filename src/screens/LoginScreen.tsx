@@ -151,11 +151,12 @@ const LoginScreen: React.FC = () => {
               style={{
                 color: theme.colors.secondary,
                 marginTop: 20,
-                fontSize: 24,
+                fontSize: 22,
               }}
             >
-              Don't have an account? Register
-            </Text>
+              Don't have an account? 
+              <Text style={{textDecorationLine: 'underline'}}> Register Here</Text>
+            </Text> 
           </TouchableOpacity>
         </View>
         {/* Dialogbox */}

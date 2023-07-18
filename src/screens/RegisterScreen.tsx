@@ -181,10 +181,11 @@ const RegisterScreen: React.FC = () => {
               style={{
                 color: theme.colors.secondary,
                 marginTop: 20,
-                fontSize: 24,
+                fontSize: 22,
               }}
             >
-              Have an account? Login
+              Have an account? 
+                <Text style={{textDecorationLine: 'underline'}}> Login Here</Text>
             </Text>
           </TouchableOpacity>
         </View>
