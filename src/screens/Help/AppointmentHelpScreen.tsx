@@ -101,7 +101,7 @@ const AccordionItem1: React.FC<{
             <List.Item
               title="Step 6" titleStyle={{ ...styles.accordionContentTitle, color: theme.colors.secondary }}
               description={<Text style={{ ...styles.descriptionText, color: theme.colors.secondary }}>
-                Click on the "Add appointment!" button and you are done!.
+                Click on the "Add appointment!" button and you are done!
               </Text>}
             />
           </ScrollView>

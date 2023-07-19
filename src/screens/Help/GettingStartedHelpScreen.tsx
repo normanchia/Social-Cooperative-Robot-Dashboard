@@ -116,7 +116,7 @@ const GettingStartedHelpScreen: React.FC = () => {
               and change the app's theme to Dark Mode for better visibility.
             </Text>
             <Image
-              source={require('../../assets/HelpScreenImg/RequestRobotScreen.png')}
+              source={require('../../assets/HelpScreenImg/SettingScreen.png')}
               style={styles.image}
             />
           </View>
