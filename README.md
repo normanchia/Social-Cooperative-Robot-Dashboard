@@ -39,7 +39,5 @@ npx react-native run-android
 
 
 ## 🔗 Links
-
-- [Backend API Documentation](https://github.com/Aashu-Dubey/Ionic-UI-Templates): Ionic version of this project.
-- [Poster !TODO](google.com)
-- [Presentation? !TODO](google.com)
+- [Poster Presentation](https://youtu.be/b_4UcRfoCIM)
+  
